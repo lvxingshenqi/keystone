@@ -160,9 +160,13 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 	}
 
 	console.log("--oss--update--debug starting...")
+	console.log("----"+JSON.stringify(files))
+
 
 	var field=this;
 	var values = this.getValueFromData(data);
+	console.log("----"+JSON.stringify(data));
+	console.log("----"+values);
 	if(!values){
 		item.set(field.path,[]);
 		return process.nextTick(callback);
@@ -199,7 +203,6 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 
 	console.log("--oss-debug--"+JSON.stringify(values));
 
-	values = _.flatten(values);
 
 	async.map(values, function (value, next) {
 		if (typeof value === 'object' && 'url' in value) {
@@ -223,6 +226,7 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 					ContentType:value.mimetype
 				},function(err,data){
 					if(err) next(err);
+					console.log(data);
 					data={
 						url:"http://"+field.bucket+"."+field.endpoint.substring(7)+"/"+value.name
 					}
