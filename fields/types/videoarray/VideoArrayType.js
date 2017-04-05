@@ -43,23 +43,29 @@ videoarray.prototype.addToSchema = function (schema) {
  * If the data object does not contain the value, then the value is set to empty array.
  */
 videoarray.prototype.updateItem = function (item, data, callback) {
-	let value = this.getValueFromData(data);
-	let result=[];
-	if (value === undefined || value === null || value === '') {
-		value = [];
+	let values = this.getValueFromData(data);
+	
+	let items=[];
+	if (values === undefined || values === null || values === '') {
+		values = [];
 	}
-	if (!Array.isArray(value)) {
-		value = [value];
+	if (!Array.isArray(values)) {
+		values = [values];
 	}
-
-	for(var i=0;i<value.length/2;i++){
-		let item={};
-		item.cover=value[i];
-		item.url=value[i+1];
-		result.push(item);
+	console.log("------videoarray-debug----"+JSON.stringify(values));
+	if(values.length==0) item.set(this.path,[]);
+	else if(typeof values[0]=="object"){
+		item.set(this.path,values);
+	}else{
+		let result=[];
+		for(var i=0;i<values.length/2;i++){
+			let item={};
+			item.cover=values[2*i];
+			item.url=values[2*i+1];
+			result.push(item);
+		}
+		item.set(this.path, result);
 	}
-
-	item.set(this.path, result);
 	process.nextTick(callback);
 };
 
