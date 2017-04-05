@@ -200,7 +200,8 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 		}
 		return value;
 	});
-
+	
+	values = _.flatten(values);
 	console.log("--oss-debug--"+JSON.stringify(values));
 
 
@@ -225,12 +226,12 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 					Bucket:field.bucket,
 					ContentType:value.mimetype
 				},function(err,data){
-					if(err) next(err);
+					if(err) return next(err);
 					console.log(data);
 					data={
 						url:"http://"+field.bucket+"."+field.endpoint.substring(7)+"/"+value.name
 					}
-					next(null,data)
+					next(null,data);
 				})
 			})
 			
