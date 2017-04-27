@@ -109,14 +109,14 @@ ossimages.prototype.addToSchema=function(schema){
 				}
 			}
 		}
-		console.log("-----oss--remove"+id);
+		// console.log("-----oss--remove"+id);
 		var img = images[id];
 		if (!img) return;
 		if (method === 'delete') {
 			field.oss.deleteObject({
 				Bucket:field.bucket,
 				Key:img.filename
-			},function(){})			
+			},function(){})
 		}
 		images.splice(id, 1);
 		if (callback) {
@@ -159,14 +159,14 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 		files = {};
 	}
 
-	console.log("--oss--update--debug starting...")
-	console.log("----"+JSON.stringify(files))
+	// console.log("--oss--update--debug starting...")
+	// console.log("----"+JSON.stringify(files))
 
 
 	var field=this;
 	var values = this.getValueFromData(data);
-	console.log("----"+JSON.stringify(data));
-	console.log("----"+values);
+	// console.log("----"+JSON.stringify(data));
+	// console.log("----"+values);
 	if(!values){
 		item.set(field.path,[]);
 		return process.nextTick(callback);
@@ -200,9 +200,9 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 		}
 		return value;
 	});
-	
+
 	values = _.flatten(values);
-	console.log("--oss-debug--"+JSON.stringify(values));
+	// console.log("--oss-debug--"+JSON.stringify(values));
 
 
 	async.map(values, function (value, next) {
@@ -227,14 +227,14 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 					ContentType:value.mimetype
 				},function(err,data){
 					if(err) return next(err);
-					console.log(data);
+					// console.log(data);
 					data={
 						url:"http://"+field.bucket+"."+field.endpoint.substring(7)+"/"+value.name
 					}
 					next(null,data);
 				})
 			})
-			
+
 		} else {
 			// Nothing to do
 			// TODO: We should really also support deleting images from cloudinary,
@@ -244,28 +244,15 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 	}, function (err, result) {
 		if (err) return callback(err);
 		result = result.filter(truthy);
-		console.log("--oss-debug"+JSON.stringify(result))
+		// console.log("--oss-debug"+JSON.stringify(result))
 		item.set(field.path, result);
 		return callback();
 	});
 
-	
 
-	
+
+
 }
 
 
 module.exports=ossimages;
-
-
-
-
-
-
-
-
-
-
-
-
-

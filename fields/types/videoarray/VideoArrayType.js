@@ -44,7 +44,7 @@ videoarray.prototype.addToSchema = function (schema) {
  */
 videoarray.prototype.updateItem = function (item, data, callback) {
 	let values = this.getValueFromData(data);
-	
+
 	let items=[];
 	if (values === undefined || values === null || values === '') {
 		values = [];
@@ -52,7 +52,7 @@ videoarray.prototype.updateItem = function (item, data, callback) {
 	if (!Array.isArray(values)) {
 		values = [values];
 	}
-	console.log("------videoarray-debug----"+JSON.stringify(values));
+	// console.log("------videoarray-debug----"+JSON.stringify(values));
 	if(values.length==0) item.set(this.path,[]);
 	else if(typeof values[0]=="object"){
 		item.set(this.path,values);
