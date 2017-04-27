@@ -9,7 +9,7 @@ import { loadItems } from '../screens/List/actions';
 
 import isEqual from 'lodash/isEqual';
 import { columnsParser, sortParser, filtersParser } from '../parsers';
-var keystone = require('../../../../index');
+// var keystone = require('../../../../index');
 
 export function * urlUpdate (query, cache, pathname) {
 	const blacklistedField = 'search';
@@ -69,7 +69,7 @@ export function * evalQueryParams () {
 	const { cachedQuery } = yield select(state => state.active);
 	const { currentList } = yield select(state => state.lists);
 
-	if (pathname !== `/${keystone.get('admin path')}/${currentList.id}`) return;
+	// if (pathname !== `/${keystone.get('admin path')}/${currentList.id}`) return;
 
 	if (isEqual(query, cachedQuery)) {
 		yield put({ type: actions.QUERY_HAS_NOT_CHANGED });
