@@ -112,7 +112,7 @@ module.exports = React.createClass({
 		};
 
 		return (
-			<div>
+			<div style={this.props.style}>
 				<FormInput
 					autoComplete="off"
 					id={this.state.id}
