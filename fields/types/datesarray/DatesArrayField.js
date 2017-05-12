@@ -4,6 +4,7 @@ import { findDOMNode } from 'react-dom';
 import moment from 'moment';
 import React from 'react';
 import DateInput from '../../components/DateInput';
+import DateSelect from '../../components/DateSelect'
 import {
 	Button,
 	FormField,
@@ -50,17 +51,18 @@ module.exports = Field.create({
 	},
 	getInitialState(){
 		return {
-			values:Array.isArray(this.props.value)?this.props.value.map(newItem):[],
+			values:Array.isArray(this.props.value.dates)?this.props.value.dates.map(newItem):[],
+			opts:Array.isArray(this.props.value.optDates)?this.props.value.optDates:[]
 		};
 	},
 	componentWillUpdate(nextProps){
-		var starts=_.map(this.props.value, 'start').join();
-		var ends=_.map(this.props.value, 'end').join();
-		var _starts=_.map(nextProps.value, 'start').join();
-		var _ends=_.map(nextProps.value, 'end').join();
+		var starts=_.map(this.props.value.dates, 'start').join();
+		var ends=_.map(this.props.value.dates, 'end').join();
+		var _starts=_.map(nextProps.value.dates, 'start').join();
+		var _ends=_.map(nextProps.value.dates, 'end').join();
 		if(starts!==_starts||ends!==_ends){
 			this.setState({
-				values: nextProps.value.map(newItem)
+				values: nextProps.value.dates.map(newItem)
 			})
 		}
 	},
@@ -93,7 +95,7 @@ module.exports = Field.create({
 	valueChanged(values) {
 		this.props.onChange({
 			path: this.props.path,
-			value: values,
+			value: {dates:values,optDates:this.state.opts}
 		});
 	},
 	processInputValue (value) {
@@ -118,22 +120,24 @@ module.exports = Field.create({
 		return (
 			<FormField key={item.key}>
 				<label>start:</label>
-				<DateInput
+				<DateSelect
 					style={inputStyle}
 					format={this.props.inputFormat}
 					ref={"item_start"+(index+1)}
 					name={this.getInputName(this.props.path)}
 					value={start}
+					optDates={this.state.opts}
 					onChange={({value})=>{
 						this.updateItem(value,item,'start')
 					}} />
 				<label>end:</label>
-				<DateInput
+				<DateSelect
 					style={inputStyle}
 					format={this.props.inputFormat}
 					ref={"item_end"+(index+1)}
 					name={this.getInputName(this.props.path)}
 					value={end}
+					optDates={this.state.opts}
 					onChange={({value})=>{
 						this.updateItem(value,item,'end')
 					}} />
@@ -151,8 +155,8 @@ module.exports = Field.create({
 					const end=this.formatValue(item.end);
 					return (
 						<div key={i} style={i ? { marginTop: '1em' } : null}>
-							<DateInput noedit value={start} />
-							<DateInput noedit value={end} />
+							<DateSelect noedit value={start} />
+							<DateSelect noedit value={end} />
 						</div>
 					);
 				})}

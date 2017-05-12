@@ -23,7 +23,7 @@ util.inherits(datesarray, FieldType);
 
 
 datesarray.prototype.format=function(item, format, separator){
-	value=item.get(this.path);
+	value=item.get(this.path).Dates;
 	if(format || this.formatString){
 		value=value.map(o=>{
 			let start=moment(o.start).format(format||this.formatString);
@@ -46,17 +46,22 @@ datesarray.prototype.addToSchema=function(schema){
 	var mongoose = keystone.mongoose;
 	var field = this;
 
-	var DatesSchema=new mongoose.Schema({
+	var DateSchema=new mongoose.Schema({
 		start:Date,
 		end:Date
 	});
 
-	schema.add(this._path.addTo({}, [DatesSchema]));
+	var DatesSchema=new mongoose.Schema({
+		Dates:[DateSchema],
+		optDates:[String]
+	});
+
+	schema.add(this._path.addTo({}, DatesSchema));
 }
 
 datesarray.prototype.updateItem = function (item, data, callback) {
 	let values = this.getValueFromData(data);
-
+	let optDates=item.get(this.path)?item.get(this.path).optDates:[];
 	let items=[];
 	if (values === undefined || values === null || values === '') {
 		values = [];
@@ -74,12 +79,16 @@ datesarray.prototype.updateItem = function (item, data, callback) {
 			let item={};
 			item.start=values[2*i];
 			item.end=values[2*i+1];
+			//如果结束时间为空，设为与开始时间相同
+			if(!item.end){
+				item.end=item.start;
+			}
 			result.push(item);
 		}
 		result=result.filter(o=>{
 			return moment(o.start).isValid()&&moment(o.end).isValid();
 		})
-		item.set(this.path, result);
+		item.set(this.path, {Dates:result,optDates});
 	}
 	process.nextTick(callback);
 };
