@@ -243,6 +243,7 @@ List.prototype.loadItem = function (itemId, options, callback) {
 	});
 };
 
+
 /**
  * Load all items of a list, optionally passing objects to build a query string
  * for sorting or searching
@@ -264,6 +265,24 @@ List.prototype.loadItems = function (options, callback) {
 			callback(data);
 		}
 	});
+};
+
+/**
+* get the next item filtered by option
+**/
+List.prototype.loadNext = function (options, callback) {
+	const url=Keystone.adminPath+ '/api/' + this.path + '/next' + '?' + qs.stringify(options);
+	xhr({
+		url: url,
+		responseType: 'json',
+	}, (err, resp, data) => {
+		if(err) callback(err);
+		if(resp.statusCode === 200) {
+			callback(null,data);
+		}else{
+			callback(data);
+		}
+	})
 };
 
 /**

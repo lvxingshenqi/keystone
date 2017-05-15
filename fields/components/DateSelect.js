@@ -142,7 +142,7 @@ module.exports = React.createClass({
 					onCancel={this.handleCancel}
 					ref="popout"
 					relativeToID={this.state.id}
-					width={380}
+					width={370}
 					>
 					<div style={{float:"left",width:"260px"}}>
 						<DayPicker

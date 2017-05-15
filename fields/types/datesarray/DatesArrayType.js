@@ -70,7 +70,7 @@ datesarray.prototype.updateItem = function (item, data, callback) {
 		values = [values];
 	}
 	// console.log("------videoarray-debug----"+JSON.stringify(values));
-	if(values.length==0) item.set(this.path,[]);
+	if(values.length==0) item.set(this.path,{Dates:[],optDates});
 	else if(typeof values[0]=="object"){
 		item.set(this.path,values);
 	}else{

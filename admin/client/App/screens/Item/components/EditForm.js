@@ -57,6 +57,7 @@ var EditForm = React.createClass({
 			values: assign({}, this.props.data.fields),
 			confirmationDialog: null,
 			loading: false,
+			loadingNext: false,
 			lastValues: null, // used for resetting
 			focusFirstField: !this.props.list.nameField && !this.props.list.nameFieldIsFormHeader,
 		};
@@ -125,7 +126,6 @@ var EditForm = React.createClass({
 		const { data, list } = this.props;
 		const editForm = this.refs.editForm;
 		const formData = new FormData(editForm);
-
 		// Show loading indicator
 		this.setState({
 			loading: true,
@@ -155,6 +155,44 @@ var EditForm = React.createClass({
 				});
 			}
 		});
+	},
+	getNext () {
+		const {data, list, router } = this.props;
+		if(list.id !== "messages"){
+			return ;
+		}else{
+			this.setState({
+				loadingNext:true,
+			});
+			list.loadNext({status:'draft'},(err,item)=>{
+				if(err) {
+					this.setState({
+						alerts: {
+							error: err,
+						},
+						loadingNext: false,
+					});
+				}else if(item.result._id === data.id){
+					smoothScrollTop();
+					this.setState({
+						alerts:{
+							success: {
+								success: 'Status not changed,return the same page!',
+							},
+						},
+						loadingNext: false,
+					})
+				}else{
+					this.setState({
+						loadingNext: false,
+					},function(){
+						router.push({
+							pathname: '/backend/'+list.id+'/'+item.result._id
+						});
+					})
+				}
+			})
+		}
 	},
 	renderKeyOrId () {
 		var className = 'EditForm__key-or-id';
@@ -260,8 +298,9 @@ var EditForm = React.createClass({
 			return null;
 		}
 
-		const { loading } = this.state;
+		const { loading, loadingNext } = this.state;
 		const loadingButtonText = loading ? 'Saving' : 'Save';
+		const loadingButtonNext = loadingNext ? 'Nexting' : 'Next';
 
 		// Padding must be applied inline so the FooterBar can determine its
 		// innerHeight at runtime. Aphrodite's styling comes later...
@@ -278,6 +317,18 @@ var EditForm = React.createClass({
 							data-button="update"
 						>
 							{loadingButtonText}
+						</LoadingButton>
+					)}
+					{!this.props.list.noedit && (
+						<LoadingButton
+							color="primary"
+							style={{marginLeft:'10px'}}
+							disabled={loadingNext}
+							loading={loadingNext}
+							onClick={this.getNext}
+							data-button="next"
+						>
+							{loadingButtonNext}
 						</LoadingButton>
 					)}
 					{!this.props.list.noedit && (

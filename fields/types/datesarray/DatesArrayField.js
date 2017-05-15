@@ -51,7 +51,7 @@ module.exports = Field.create({
 	},
 	getInitialState(){
 		return {
-			values:Array.isArray(this.props.value.dates)?this.props.value.dates.map(newItem):[],
+			values:Array.isArray(this.props.value.Dates)?this.props.value.Dates.map(newItem):[],
 			opts:Array.isArray(this.props.value.optDates)?this.props.value.optDates:[]
 		};
 	},
@@ -93,9 +93,11 @@ module.exports = Field.create({
 		this.valueChanged(reduceValues(updatedValues));
 	},
 	valueChanged(values) {
+		console.log("fixed");
+		var optDates=this.state.opts;
 		this.props.onChange({
 			path: this.props.path,
-			value: {dates:values,optDates:this.state.opts}
+			value: {Dates:values,optDates}
 		});
 	},
 	processInputValue (value) {
@@ -155,8 +157,8 @@ module.exports = Field.create({
 					const end=this.formatValue(item.end);
 					return (
 						<div key={i} style={i ? { marginTop: '1em' } : null}>
-							<DateSelect noedit value={start} />
-							<DateSelect noedit value={end} />
+							<DateInput noedit value={start} />
+							<DateInput noedit value={end} />
 						</div>
 					);
 				})}
