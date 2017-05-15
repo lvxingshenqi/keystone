@@ -173,6 +173,7 @@ var EditForm = React.createClass({
 						loadingNext: false,
 					});
 				}else if(item.result._id === data.id){
+					//当前item未改变状态，返回原item
 					smoothScrollTop();
 					this.setState({
 						alerts:{
@@ -181,6 +182,17 @@ var EditForm = React.createClass({
 							},
 						},
 						loadingNext: false,
+					})
+				}else if(typeof item.result=='string'){
+					//返回内容为空，无匹配item
+					smoothScrollTop();
+					this.setState({
+						alerts:{
+							success: {
+								success: item.result
+							}
+						},
+						loadingNext:false,
 					})
 				}else{
 					this.setState({
