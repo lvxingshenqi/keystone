@@ -11,7 +11,7 @@ const UserInfo = ({
 }) => {
 	const adminButton = userCanAccessKeystone ? (
 		<Button href={adminPath} color="primary">
-			Open Keystone
+			Open 随意门
 		</Button>
 	) : null;
 
