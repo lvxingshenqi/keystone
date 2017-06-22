@@ -9,6 +9,7 @@ import {
 	ResponsiveText,
 } from '../../../elemental';
 
+import { series } from 'async';
 import { Fields } from 'FieldTypes';
 import { fade } from '../../../../utils/color';
 import theme from '../../../../theme';
@@ -58,6 +59,8 @@ var EditForm = React.createClass({
 			confirmationDialog: null,
 			loading: false,
 			loadingNext: false,
+			loadingPub: false,
+			loadingPubNext: false,
 			lastValues: null, // used for resetting
 			focusFirstField: !this.props.list.nameField && !this.props.list.nameFieldIsFormHeader,
 		};
@@ -126,6 +129,7 @@ var EditForm = React.createClass({
 		const { data, list } = this.props;
 		const editForm = this.refs.editForm;
 		const formData = new FormData(editForm);
+
 		// Show loading indicator
 		this.setState({
 			loading: true,
@@ -156,6 +160,7 @@ var EditForm = React.createClass({
 			}
 		});
 	},
+	//进入下一条草稿
 	getNext () {
 		const {data, list, router } = this.props;
 		if(list.id !== "messages"){
@@ -168,12 +173,13 @@ var EditForm = React.createClass({
 				if(err) {
 					this.setState({
 						alerts: {
-							error: err,
+							error:{
+								error:err.err
+							}
 						},
 						loadingNext: false,
 					});
 				}else if(item.result._id === data.id){
-					//当前item未改变状态，返回原item
 					smoothScrollTop();
 					this.setState({
 						alerts:{
@@ -182,17 +188,6 @@ var EditForm = React.createClass({
 							},
 						},
 						loadingNext: false,
-					})
-				}else if(typeof item.result=='string'){
-					//返回内容为空，无匹配item
-					smoothScrollTop();
-					this.setState({
-						alerts:{
-							success: {
-								success: item.result
-							}
-						},
-						loadingNext:false,
 					})
 				}else{
 					this.setState({
@@ -206,6 +201,104 @@ var EditForm = React.createClass({
 			})
 		}
 	},
+	//保存发布
+	pubAndSave() {
+		const { data, list } = this.props;
+		const editForm = this.refs.editForm;
+		const formData = new FormData(editForm);
+		//强制将状态变成发布
+		if(formData.has("status")){
+			formData.set("status","published");
+		}
+		// Show loading indicator
+		this.setState({
+			loadingPub: true,
+		});
+
+		list.updateItem(data.id, formData, (err, data) => {
+			smoothScrollTop();
+			if (err) {
+				this.setState({
+					alerts: {
+						error: {
+							err:err.err
+						},
+					},
+					loadingPub: false,
+				});
+			} else {
+				// Success, display success flash messages, replace values
+				// TODO: Update key value
+				this.setState({
+					alerts: {
+						success: {
+							success: 'Your changes have been saved successfully',
+						},
+					},
+					lastValues: this.state.values,
+					values: data.fields,
+					loadingPub: false,
+				});
+			}
+		});
+	},
+	//保存发布并且进入下一条
+	pubAndNext(){
+		const {data, list, router } = this.props;
+		const editForm = this.refs.editForm;
+		const formData = new FormData(editForm);
+		//强制将状态变成发布
+		if(formData.has("status")){
+			formData.set("status","published");
+		}
+		this.setState({
+			loadingPubNext: true,
+		});
+		var that=this
+		series([
+			function(callback){
+				list.updateItem(data.id, formData, (err, data) => {
+					if(err){
+						callback(err)
+					}else{
+						callback(null,data)
+					}
+				})
+			},
+			function(callback){
+				list.loadNext({status:'draft'}, (err,item) => {
+					if(err){
+						callback(err)
+					}else{
+						callback(null, item)
+					}
+				})
+			}],
+			function(err,results){
+				smoothScrollTop();
+					if(err){
+						that.setState({
+							alerts: {
+								error: {
+									error:err.err
+								},
+							},
+							loadingPubNext: false,
+						});
+					}else{
+						var item=results[1]
+						that.setState({
+							loadingPubNext: false,
+						},function(){
+							router.push({
+								pathname: '/backend/'+list.id+'/'+item.result._id
+							});
+						})
+					}
+			})
+
+	},
+
 	renderKeyOrId () {
 		var className = 'EditForm__key-or-id';
 		var list = this.props.list;
@@ -305,14 +398,83 @@ var EditForm = React.createClass({
 			}
 		}, this);
 	},
+	renderFirstHalfFormElements(){
+		var headings = 0;
+		var eles=this.props.list.uiElements.slice(0,8)
+		return eles.map((el, index) => {
+			// Don't render the name field if it is the header since it'll be rendered in BIG above
+			// the list. (see renderNameField method, this is the reverse check of the one it does)
+			if (
+				this.props.list.nameField
+				&& el.field === this.props.list.nameField.path
+				&& this.props.list.nameFieldIsFormHeader
+			) return;
+
+			if (el.type === 'heading') {
+				headings++;
+				el.options.values = this.state.values;
+				el.key = 'h-' + headings;
+				return React.createElement(FormHeading, el);
+			}
+
+			if (el.type === 'field') {
+				var field = this.props.list.fields[el.field];
+				var props = this.getFieldProps(field);
+				if (typeof Fields[field.type] !== 'function') {
+					return React.createElement(InvalidFieldType, { type: field.type, path: field.path, key: field.path });
+				}
+				props.key = field.path;
+				if (index === 0 && this.state.focusFirstField) {
+					props.autoFocus = true;
+				}
+				return React.createElement(Fields[field.type], props);
+			}
+		}, this);
+	},
+
+	renderSecondHalfFormElements(){
+		var headings = 0;
+		var eles=this.props.list.uiElements.slice(8)
+		return eles.map((el, index) => {
+			// Don't render the name field if it is the header since it'll be rendered in BIG above
+			// the list. (see renderNameField method, this is the reverse check of the one it does)
+			if (
+				this.props.list.nameField
+				&& el.field === this.props.list.nameField.path
+				&& this.props.list.nameFieldIsFormHeader
+			) return;
+
+			if (el.type === 'heading') {
+				headings++;
+				el.options.values = this.state.values;
+				el.key = 'h-' + headings;
+				return React.createElement(FormHeading, el);
+			}
+
+			if (el.type === 'field') {
+				var field = this.props.list.fields[el.field];
+				var props = this.getFieldProps(field);
+				if (typeof Fields[field.type] !== 'function') {
+					return React.createElement(InvalidFieldType, { type: field.type, path: field.path, key: field.path });
+				}
+				props.key = field.path;
+				if (index === 0 && this.state.focusFirstField) {
+					props.autoFocus = true;
+				}
+				return React.createElement(Fields[field.type], props);
+			}
+		}, this);
+	},
 	renderFooterBar () {
 		if (this.props.list.noedit && this.props.list.nodelete) {
 			return null;
 		}
 
-		const { loading, loadingNext } = this.state;
+		const { loading, loadingNext, loadingPub, loadingPubNext } = this.state;
 		const loadingButtonText = loading ? 'Saving' : 'Save';
 		const loadingButtonNext = loadingNext ? 'Nexting' : 'Next';
+		const loadingButtonPubSave = loadingPub ? 'PubSaving' : 'PubSave';
+		const loadingButtonPubNext = loadingPubNext ? 'PubNexting' : 'PubNext';
 
 		// Padding must be applied inline so the FooterBar can determine its
 		// innerHeight at runtime. Aphrodite's styling comes later...
@@ -331,7 +493,7 @@ var EditForm = React.createClass({
 							{loadingButtonText}
 						</LoadingButton>
 					)}
-					{!this.props.list.noedit && (
+					{!this.props.list.noedit && this.props.list.id=="messages"&&(
 						<LoadingButton
 							color="primary"
 							style={{marginLeft:'10px'}}
@@ -341,6 +503,30 @@ var EditForm = React.createClass({
 							data-button="next"
 						>
 							{loadingButtonNext}
+						</LoadingButton>
+					)}
+					{!this.props.list.noedit && this.props.list.id=="messages"&&(
+						<LoadingButton
+							color="primary"
+							style={{marginLeft:'10px'}}
+							disabled={loadingPub}
+							loading={loadingPub}
+							onClick={this.pubAndSave}
+							data-button="pub&save"
+						>
+							{loadingButtonPubSave}
+						</LoadingButton>
+					)}
+					{!this.props.list.noedit && this.props.list.id=="messages"&&(
+						<LoadingButton
+							color="primary"
+							style={{marginLeft:'10px'}}
+							disabled={loadingPubNext}
+							loading={loadingPubNext}
+							onClick={this.pubAndNext}
+							data-button="pub&next"
+						>
+							{loadingButtonPubNext}
 						</LoadingButton>
 					)}
 					{!this.props.list.noedit && (
@@ -432,20 +618,45 @@ var EditForm = React.createClass({
 		) : null;
 	},
 	render () {
+		var list=this.props.list;
 		return (
 			<form ref="editForm" className="EditForm-container">
 				{(this.state.alerts) ? <AlertMessages alerts={this.state.alerts} /> : null}
-				<Grid.Row>
-					<Grid.Col large="three-quarters">
-						<Form layout="horizontal" component="div">
-							{this.renderNameField()}
-							{this.renderKeyOrId()}
-							{this.renderFormElements()}
-							{this.renderTrackingMeta()}
-						</Form>
-					</Grid.Col>
-					<Grid.Col large="one-quarter"><span /></Grid.Col>
-				</Grid.Row>
+				{list.id=="messages"?(
+					<Grid.Row>
+						<Grid.Col large="one-half">
+							<Form layout="horizontal" component="div" style={{marginRight:20}}>
+								{this.renderNameField()}
+								{this.renderKeyOrId()}
+								{this.renderFirstHalfFormElements()}
+								{/* {this.renderTrackingMeta()} */}
+							</Form>
+						</Grid.Col>
+						<Grid.Col large="one-half">
+							<Form layout="horizontal" component="div" style={{marginLeft:'20px',marginRight:'30px',position:"fixed",bottom:"20px"}}>
+								{/* {this.renderNameField()} */}
+								{/* {this.renderKeyOrId()} */}
+								{this.renderSecondHalfFormElements()}
+								{/* {this.renderTrackingMeta()} */}
+							</Form>
+						</Grid.Col>
+					</Grid.Row>):(
+						<Grid.Row>
+							<Grid.Col large="three-quarters">
+								<Form layout="horizontal" component="div">
+									{this.renderNameField()}
+									{this.renderKeyOrId()}
+									{this.renderFormElements()}
+									{this.renderTrackingMeta()}
+								</Form>
+							</Grid.Col>
+							<Grid.Col large="one-quarter">
+								<Form layout="horizontal" component="div">
+									<span />
+								</Form>
+							</Grid.Col>
+						</Grid.Row>)
+					}
 				{this.renderFooterBar()}
 				<ConfirmationDialog
 					confirmationLabel="Reset"
