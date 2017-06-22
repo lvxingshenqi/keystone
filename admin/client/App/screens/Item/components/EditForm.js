@@ -633,7 +633,7 @@ var EditForm = React.createClass({
 							</Form>
 						</Grid.Col>
 						<Grid.Col large="one-half">
-							<Form layout="horizontal" component="div" style={{marginLeft:'20px',marginRight:'30px',position:"fixed",bottom:"20px"}}>
+							<Form layout="horizontal" component="div" style={{marginLeft:'20px',marginRight:'30px',position:"fixed",top:"300px"}}>
 								{/* {this.renderNameField()} */}
 								{/* {this.renderKeyOrId()} */}
 								{this.renderSecondHalfFormElements()}
