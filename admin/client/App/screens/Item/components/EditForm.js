@@ -622,41 +622,21 @@ var EditForm = React.createClass({
 		return (
 			<form ref="editForm" className="EditForm-container">
 				{(this.state.alerts) ? <AlertMessages alerts={this.state.alerts} /> : null}
-				{list.id=="messages"?(
-					<Grid.Row>
-						<Grid.Col large="one-half">
-							<Form layout="horizontal" component="div" style={{marginRight:20}}>
-								{this.renderNameField()}
-								{this.renderKeyOrId()}
-								{this.renderFirstHalfFormElements()}
-								{/* {this.renderTrackingMeta()} */}
-							</Form>
-						</Grid.Col>
-						<Grid.Col large="one-half">
-							<Form layout="horizontal" component="div" style={{marginLeft:'20px',marginRight:'30px',position:"fixed",top:"300px"}}>
-								{/* {this.renderNameField()} */}
-								{/* {this.renderKeyOrId()} */}
-								{this.renderSecondHalfFormElements()}
-								{/* {this.renderTrackingMeta()} */}
-							</Form>
-						</Grid.Col>
-					</Grid.Row>):(
-						<Grid.Row>
-							<Grid.Col large="three-quarters">
-								<Form layout="horizontal" component="div">
-									{this.renderNameField()}
-									{this.renderKeyOrId()}
-									{this.renderFormElements()}
-									{this.renderTrackingMeta()}
-								</Form>
-							</Grid.Col>
-							<Grid.Col large="one-quarter">
-								<Form layout="horizontal" component="div">
-									<span />
-								</Form>
-							</Grid.Col>
-						</Grid.Row>)
-					}
+				<Grid.Row>
+					<Grid.Col large="three-quarters">
+						<Form layout="horizontal" component="div">
+							{this.renderNameField()}
+							{this.renderKeyOrId()}
+							{this.renderFormElements()}
+							{this.renderTrackingMeta()}
+						</Form>
+					</Grid.Col>
+					<Grid.Col large="one-quarter">
+						<Form layout="horizontal" component="div">
+							<span />
+						</Form>
+					</Grid.Col>
+				</Grid.Row>
 				{this.renderFooterBar()}
 				<ConfirmationDialog
 					confirmationLabel="Reset"
