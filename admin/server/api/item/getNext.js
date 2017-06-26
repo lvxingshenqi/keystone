@@ -1,15 +1,17 @@
 const assign = require('object-assign');
 
 module.exports=function(req,res){
-	let options={};
-	assign(options,req.query);
-	req.list.model.findOne(options,function(err,item){
+	let conditions={};
+	let options={limit:1,sort:{"insertDate":-1}}
+	assign(conditions,req.query);
+
+	req.list.model.find(conditions,null,options,function(err,items){
 		if (err) return res.status(500).json({ err: 'database error', detail: err });
-		if(!item) return res.json({
+		if(!items||items.length==0) return res.json({
 			result: 'no more item satisfied with options',
 		});
 		return res.json({
-			result: item
+			result: items[0]
 		})
 	})
 }
