@@ -7,6 +7,7 @@ function FormNote ({
 	children,
 	component: Component,
 	html,
+	note,
 	...props
 }) {
 	props.className = css(classes.note, className);
@@ -28,6 +29,7 @@ FormNote.propTypes = {
 		PropTypes.string,
 	]),
 	html: PropTypes.string,
+	note: PropTypes.string,
 };
 FormNote.defaultProps = {
 	component: 'div',

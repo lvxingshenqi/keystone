@@ -365,105 +365,48 @@ var EditForm = React.createClass({
 			);
 		}
 	},
+	renderFormElementsBase(elements) {
+		var headings = 0;
+		return elements.map((el, index) => {
+			// Don't render the name field if it is the header since it'll be rendered in BIG above
+			// the list. (see renderNameField method, this is the reverse check of the one it does)
+			if (
+				this.props.list.nameField
+				&& el.field === this.props.list.nameField.path
+				&& this.props.list.nameFieldIsFormHeader
+			) return;
+
+			if(this.props.list.id == "messages" && (
+				(el.type == "heading" && el.content == "Meta") ||
+				(el.type == "field" && el.field == "createdAt") ||
+				(el.type == "field" && el.field == "createdBy") ||
+				(el.type == "field" && el.field == "updatedAt") ||
+				(el.type == "field" && el.field == "updatedBy")))
+			return;
+
+			if (el.type === 'heading') {
+				headings++;
+				el.options.values = this.state.values;
+				el.key = 'h-' + headings;
+				return React.createElement(FormHeading, el);
+			}
+
+			if (el.type === 'field') {
+				var field = this.props.list.fields[el.field];
+				var props = this.getFieldProps(field);
+				if (typeof Fields[field.type] !== 'function') {
+					return React.createElement(InvalidFieldType, { type: field.type, path: field.path, key: field.path });
+				}
+				props.key = field.path;
+				if (index === 0 && this.state.focusFirstField) {
+					props.autoFocus = true;
+				}
+				return React.createElement(Fields[field.type], props);
+			}
+		}, this);
+	},
 	renderFormElements () {
-		var headings = 0;
-
-		return this.props.list.uiElements.map((el, index) => {
-			// Don't render the name field if it is the header since it'll be rendered in BIG above
-			// the list. (see renderNameField method, this is the reverse check of the one it does)
-			if (
-				this.props.list.nameField
-				&& el.field === this.props.list.nameField.path
-				&& this.props.list.nameFieldIsFormHeader
-			) return;
-
-			if (el.type === 'heading') {
-				headings++;
-				el.options.values = this.state.values;
-				el.key = 'h-' + headings;
-				return React.createElement(FormHeading, el);
-			}
-
-			if (el.type === 'field') {
-				var field = this.props.list.fields[el.field];
-				var props = this.getFieldProps(field);
-				if (typeof Fields[field.type] !== 'function') {
-					return React.createElement(InvalidFieldType, { type: field.type, path: field.path, key: field.path });
-				}
-				props.key = field.path;
-				if (index === 0 && this.state.focusFirstField) {
-					props.autoFocus = true;
-				}
-				return React.createElement(Fields[field.type], props);
-			}
-		}, this);
-	},
-	renderFirstHalfFormElements(){
-		var headings = 0;
-		var eles=this.props.list.uiElements.slice(0,8)
-		return eles.map((el, index) => {
-			// Don't render the name field if it is the header since it'll be rendered in BIG above
-			// the list. (see renderNameField method, this is the reverse check of the one it does)
-			if (
-				this.props.list.nameField
-				&& el.field === this.props.list.nameField.path
-				&& this.props.list.nameFieldIsFormHeader
-			) return;
-
-			if (el.type === 'heading') {
-				headings++;
-				el.options.values = this.state.values;
-				el.key = 'h-' + headings;
-				return React.createElement(FormHeading, el);
-			}
-
-			if (el.type === 'field') {
-				var field = this.props.list.fields[el.field];
-				var props = this.getFieldProps(field);
-				if (typeof Fields[field.type] !== 'function') {
-					return React.createElement(InvalidFieldType, { type: field.type, path: field.path, key: field.path });
-				}
-				props.key = field.path;
-				if (index === 0 && this.state.focusFirstField) {
-					props.autoFocus = true;
-				}
-				return React.createElement(Fields[field.type], props);
-			}
-		}, this);
-	},
-
-	renderSecondHalfFormElements(){
-		var headings = 0;
-		var eles=this.props.list.uiElements.slice(8)
-		return eles.map((el, index) => {
-			// Don't render the name field if it is the header since it'll be rendered in BIG above
-			// the list. (see renderNameField method, this is the reverse check of the one it does)
-			if (
-				this.props.list.nameField
-				&& el.field === this.props.list.nameField.path
-				&& this.props.list.nameFieldIsFormHeader
-			) return;
-
-			if (el.type === 'heading') {
-				headings++;
-				el.options.values = this.state.values;
-				el.key = 'h-' + headings;
-				return React.createElement(FormHeading, el);
-			}
-
-			if (el.type === 'field') {
-				var field = this.props.list.fields[el.field];
-				var props = this.getFieldProps(field);
-				if (typeof Fields[field.type] !== 'function') {
-					return React.createElement(InvalidFieldType, { type: field.type, path: field.path, key: field.path });
-				}
-				props.key = field.path;
-				if (index === 0 && this.state.focusFirstField) {
-					props.autoFocus = true;
-				}
-				return React.createElement(Fields[field.type], props);
-			}
-		}, this);
+		return this.renderFormElementsBase(this.props.list.uiElements);
 	},
 	renderFooterBar () {
 		if (this.props.list.noedit && this.props.list.nodelete) {
@@ -471,10 +414,10 @@ var EditForm = React.createClass({
 		}
 
 		const { loading, loadingNext, loadingPub, loadingPubNext } = this.state;
-		const loadingButtonText = loading ? 'Saving' : 'Save';
-		const loadingButtonNext = loadingNext ? 'Nexting' : 'Next';
-		const loadingButtonPubSave = loadingPub ? 'PubSaving' : 'PubSave';
-		const loadingButtonPubNext = loadingPubNext ? 'PubNexting' : 'PubNext';
+		const loadingButtonText = loading ? 'Saving' : '保存';
+		const loadingButtonNext = loadingNext ? 'Nexting' : '下一个草稿';
+		const loadingButtonPubSave = loadingPub ? 'PubSaving' : '保存并发布';
+		const loadingButtonPubNext = loadingPubNext ? 'PubNexting' : '保存&发布&下一个草稿';
 
 		// Padding must be applied inline so the FooterBar can determine its
 		// innerHeight at runtime. Aphrodite's styling comes later...
@@ -612,7 +555,7 @@ var EditForm = React.createClass({
 
 		return Object.keys(elements).length ? (
 			<div className="EditForm__meta">
-				<h3 className="form-heading">Meta</h3>
+				<h3 className="form-heading">Metasaaaa</h3>
 				{elements}
 			</div>
 		) : null;
@@ -622,21 +565,54 @@ var EditForm = React.createClass({
 		return (
 			<form ref="editForm" className="EditForm-container">
 				{(this.state.alerts) ? <AlertMessages alerts={this.state.alerts} /> : null}
-				<Grid.Row>
-					<Grid.Col large="three-quarters">
-						<Form layout="horizontal" component="div">
-							{this.renderNameField()}
-							{this.renderKeyOrId()}
-							{this.renderFormElements()}
-							{this.renderTrackingMeta()}
-						</Form>
-					</Grid.Col>
-					<Grid.Col large="one-quarter">
-						<Form layout="horizontal" component="div">
-							<span />
-						</Form>
-					</Grid.Col>
-				</Grid.Row>
+				{
+					list.id=="messages"?(
+					<Grid.Row>
+						<Grid.Col large="one-third">
+							<Form layout="horizontal" component="div" style={{marginRight:20}}>
+								{this.renderNameField()}
+								{/* {this.renderKeyOrId()} */}
+								{this.renderFormElementsBase(this.props.list.uiElements.slice(0,3))}
+								{/* {this.renderTrackingMeta()} */}
+							</Form>
+						</Grid.Col>
+						<Grid.Col large="one-third">
+							<Form layout="horizontal" component="div" style={{marginRight:20}}>
+								 {/* style={{marginLeft:'20px',marginRight:'30px',position:"fixed",top:"300px"}}> */}
+								{/* {this.renderNameField()} */}
+								{/* {this.renderKeyOrId()} */}
+								{this.renderFormElementsBase(this.props.list.uiElements.slice(3,9))}
+								{/* {this.renderTrackingMeta()} */}
+							</Form>
+						</Grid.Col>
+						<Grid.Col large="one-third">
+							<Form layout="horizontal" component="div" style={{marginRight:20}}>
+								 {/* style={{marginLeft:'20px',marginRight:'30px',position:"fixed",top:"300px"}}> */}
+								{/* {this.renderNameField()} */}
+								{/* {this.renderKeyOrId()} */}
+								{this.renderFormElementsBase(this.props.list.uiElements.slice(9))}
+								{/* {this.renderTrackingMeta()} */}
+							</Form>
+						</Grid.Col>
+					</Grid.Row>
+				):(
+					<Grid.Row>
+						<Grid.Col large="three-quarters">
+							<Form layout="horizontal" component="div">
+								{this.renderNameField()}
+								{this.renderKeyOrId()}
+								{this.renderFormElements()}
+								{this.renderTrackingMeta()}
+							</Form>
+						</Grid.Col>
+						<Grid.Col large="one-quarter">
+							<Form layout="horizontal" component="div">
+								<span />
+							</Form>
+						</Grid.Col>
+					</Grid.Row>
+				)
+				}
 				{this.renderFooterBar()}
 				<ConfirmationDialog
 					confirmationLabel="Reset"
@@ -666,12 +642,12 @@ const styles = {
 	footerbar: {
 		backgroundColor: fade(theme.color.body, 93),
 		boxShadow: '0 -2px 0 rgba(0, 0, 0, 0.1)',
-		paddingBottom: 20,
-		paddingTop: 20,
+		paddingBottom: 10,
+		paddingTop: 10,
 		zIndex: 99,
 	},
 	footerbarInner: {
-		height: theme.component.height, // FIXME aphrodite bug
+		height: 54,//theme.component.height, // FIXME aphrodite bug
 	},
 	deleteButton: {
 		float: 'right',

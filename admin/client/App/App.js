@@ -77,14 +77,14 @@ const App = (props) => {
 			<main className={css(classes.body)}>
 				{children}
 			</main>
-			<Footer
+			{/* <Footer
 				appversion={Keystone.appversion}
 				backUrl={Keystone.backUrl}
 				brand={Keystone.brand}
 				User={Keystone.User}
 				user={Keystone.user}
 				version={Keystone.version}
-			/>
+			/> */}
 		</div>
 	);
 };

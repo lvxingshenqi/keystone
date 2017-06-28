@@ -174,7 +174,7 @@ theme.form = {
 		color: theme.color.gray50,
 		fontSize: '1rem',
 		fontWeight: 'normal',
-		width: 180,
+		width: 100,
 	},
 	note: {
 		color: theme.color.gray40,

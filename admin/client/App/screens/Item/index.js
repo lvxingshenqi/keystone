@@ -152,12 +152,22 @@ var ItemView = React.createClass({
 			);
 		}
 
+		const containerStyle = {
+			transition: 'max-width 160ms ease-out',
+			msTransition: 'max-width 160ms ease-out',
+			MozTransition: 'max-width 160ms ease-out',
+			WebkitTransition: 'max-width 160ms ease-out',
+		};
+		if (this.props.routeParams && this.props.routeParams.listId === "messages") {
+			containerStyle.maxWidth = '100%';
+		}
+
 		// When we have the data, render the item view with it
 		return (
 			<div data-screen-id="item">
 				{(this.props.error) ? this.handleError(this.props.error) : (
 					<div>
-						<Container>
+						<Container style={containerStyle}>
 							<EditFormHeader
 								list={this.props.currentList}
 								data={this.props.data}

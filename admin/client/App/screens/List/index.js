@@ -58,6 +58,7 @@ const ListView = React.createClass({
 			},
 			checkedItems: {},
 			constrainTableWidth: true,
+			customConstrainTableWidth: true,
 			manageMode: false,
 			showCreateForm: false,
 			showUpdateForm: false,
@@ -72,7 +73,6 @@ const ListView = React.createClass({
 
 		const isNoCreate = this.props.lists.data[this.props.params.listId].nocreate;
 		const shouldOpenCreate = this.props.location.search === '?create';
-
 		this.setState({
 			showCreateForm: (shouldOpenCreate && !isNoCreate) || Keystone.createFormErrors,
 		});
@@ -254,7 +254,7 @@ const ListView = React.createClass({
 					list={listsByPath[this.props.params.listId]}
 
 					// expand
-					expandIsActive={!this.state.constrainTableWidth}
+					expandIsActive={!this.state.constrainTableWidth || this.state.customConstrainTableWidth}
 					expandOnClick={this.toggleTableWidth}
 
 					// create
@@ -441,7 +441,8 @@ const ListView = React.createClass({
 			MozTransition: 'max-width 160ms ease-out',
 			WebkitTransition: 'max-width 160ms ease-out',
 		};
-		if (!this.state.constrainTableWidth) {
+		this.state.customConstrainTableWidth = (this.props.routeParams && (this.props.routeParams.listId == "messages" || this.props.routeParams.listId == "topics"))
+		if (!this.state.constrainTableWidth || this.state.customConstrainTableWidth) {
 			containerStyle.maxWidth = '100%';
 		}
 		return (

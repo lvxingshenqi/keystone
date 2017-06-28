@@ -83,8 +83,8 @@ var FooterBar = React.createClass({
 	},
 	render () {
 		var wrapperStyle = {
-			height: this.state.height,
-			marginTop: 60,
+			height: 54,//this.state.height,
+			// marginTop: 60,
 			position: 'relative',
 		};
 		var footerProps = blacklist(this.props, 'children', 'style');
@@ -92,7 +92,7 @@ var FooterBar = React.createClass({
 			position: this.state.position,
 			top: this.state.top,
 			width: this.state.width,
-			height: this.state.height,
+			height: 54,//this.state.height,
 		});
 		return (
 			<div ref="wrapper" style={wrapperStyle}>
