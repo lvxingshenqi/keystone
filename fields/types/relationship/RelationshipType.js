@@ -222,9 +222,10 @@ relationship.prototype.updateItem = function (item, data, callback) {
 	}
 
 	var value = this.getValueFromData(data);
-	if (value === undefined) {
-		return process.nextTick(callback);
-	}
+	//修复relationship最后一项无法修改的问题
+	// if (value === undefined) {
+	// 	return process.nextTick(callback);
+	// }
 
 	// Are we handling a many relationship or just one value?
 	if (this.many) {
