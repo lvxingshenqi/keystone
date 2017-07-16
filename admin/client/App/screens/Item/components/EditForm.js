@@ -209,7 +209,9 @@ var EditForm = React.createClass({
 		//强制将状态变成发布
 		if(formData.has("status")){
 			formData.set("status","published");
+			formData.has("publishedDate")?formData.set("publishedDate",new Date().toISOString()):formData.append("publishedDate",new Date().toISOString());
 		}
+
 		// Show loading indicator
 		this.setState({
 			loadingPub: true,
@@ -250,6 +252,7 @@ var EditForm = React.createClass({
 		//强制将状态变成发布
 		if(formData.has("status")){
 			formData.set("status","published");
+			formData.has("publishedDate")?formData.set("publishedDate",new Date().toISOString()):formData.append("publishedDate",new Date().toISOString());
 		}
 		this.setState({
 			loadingPubNext: true,
