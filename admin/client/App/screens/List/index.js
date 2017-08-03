@@ -441,7 +441,7 @@ const ListView = React.createClass({
 			MozTransition: 'max-width 160ms ease-out',
 			WebkitTransition: 'max-width 160ms ease-out',
 		};
-		this.state.customConstrainTableWidth = (this.props.routeParams && (this.props.routeParams.listId == "messages" || this.props.routeParams.listId == "topics"))
+		//this.state.customConstrainTableWidth = (this.props.routeParams && (this.props.routeParams.listId == "messages" || this.props.routeParams.listId == "topics"))
 		if (!this.state.constrainTableWidth || this.state.customConstrainTableWidth) {
 			containerStyle.maxWidth = '100%';
 		}
