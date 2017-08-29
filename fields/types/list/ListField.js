@@ -43,7 +43,7 @@ module.exports = Field.create({
 		value: React.PropTypes.array,
 	},
 	addItem () {
-		const { path, value, onChange } = this.props;
+		const { path, value=[], onChange } = this.props;
 		onChange({
 			path,
 			value: [
