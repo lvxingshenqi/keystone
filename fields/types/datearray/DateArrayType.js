@@ -182,6 +182,7 @@ datearray.prototype.inputIsValid = function (data, required, item) {
 datearray.prototype.updateItem = function (item, data, callback) {
 
 	var value = this.getValueFromData(data);
+
 	if (Array.isArray(value)) {
 		// Only save valid dates
 		value = value.filter(function (date) {
