@@ -95,7 +95,16 @@ var PrimaryNavigation = React.createClass({
 			const isActive = this.props.currentSectionKey && this.props.currentSectionKey === section.key;
 			const className = isActive ? 'primary-navbar__item--active' : null;
 
-			return (
+			return section.lists[0].external ? (
+				<PrimaryNavItem
+					label="octicon-globe"
+					href={href}
+					key={section.key}
+					title={section.label}
+				>
+					{section.label}
+				</PrimaryNavItem>
+			) : (
 				<PrimaryNavItem
 					active={isActive}
 					key={section.key}
