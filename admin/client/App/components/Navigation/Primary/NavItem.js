@@ -29,6 +29,7 @@ const PrimaryNavItem = ({ children, className, href, label, title, to, active })
 			key={title}
 			tabIndex="-1"
 			title={title}
+			target="_blank"
 		>
 			{children}
 		</a>
