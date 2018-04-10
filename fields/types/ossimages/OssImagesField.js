@@ -189,7 +189,7 @@ module.exports = Field.create({
 					type="hidden"
 				/>
 			);
-		} else if (this.getCount('isDeleted') === this.props.value.length) {
+		} else if (this.props.value && this.getCount('isDeleted') === this.props.value.length) {
 			return (
 				<input
 					name={this.getInputName(this.props.path)}
