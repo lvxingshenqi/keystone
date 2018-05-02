@@ -76,6 +76,20 @@ relationship.prototype.addToSchema = function (schema) {
 		required: (this.options.required ? true : false),
 		unique: (this.options.unique ? true : false),
 	};
+	for (prop in this.options) {
+		// Map to field if it's an Elasticsearch option
+		if (this.options.hasOwnProperty(prop) && prop.indexOf('es_') === 0) {
+			def[prop] = this.options[prop]
+		}
+	}
+	// 不能用这种办法，会导致 MongooseError: Cast to ObjectId failed for value "user" at path "role"
+	// var def = Object.assign({}, _.cloneDeep(this.options), {
+	// 	type: this._nativeType,
+	// 	ref: this.options.ref,
+	// 	index: (this.options.index ? true : false),
+	// 	required: (this.options.required ? true : false),
+	// 	unique: (this.options.unique ? true : false),
+	// });
 	this.paths = {
 		refList: this.options.refListPath || this.path + 'RefList',
 	};
