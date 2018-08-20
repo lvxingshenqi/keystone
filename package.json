@@ -44,6 +44,8 @@
     "express-request-language": "1.1.9",
     "express-session": "1.15.1",
     "expression-match": "0.0.17",
+    "ffprobe": "^1.1.0",
+    "ffprobe-static": "^2.0.0",
     "fs-extra": "1.0.0",
     "glamor": "^2.20.24",
     "grappling-hook": "3.0.0",
