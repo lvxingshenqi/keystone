@@ -52,6 +52,7 @@ ossvideos.prototype.addToSchema=function(schema){
 	var VideoSchema=new mongoose.Schema({
 		url:String,
 		duration:Number,
+		size:Number,
 		width:Number,
 		height:Number,
 	});
@@ -230,17 +231,17 @@ ossvideos.prototype.updateItem = function (item, data, files, callback) {
 					ContentType:value.mimetype
 				},function(err,data){
 					if(err) return next(err);
-					console.log('OssVideosType.js OssVideos putObject result', data);
-					ffprobe(value.path, { path: ffprobeStatic.path }, function (err, info) {
-  					if (err || !info) return next(err);
-						console.log('OssVideosType.js video', info.streams[0], info.streams[0].duration, info.streams[0].width, info.streams[0].height);
-						data={
-							url:"http://"+field.bucket+"."+field.endpoint.substring(7)+"/"+value.name,
-							duration: info.streams[0].duration,
-							width: info.streams[0].width,
-							height: info.streams[0].height,
+					ffprobe(value.path, {path: ffprobeStatic.path}, function (err, info) {
+                        data = {
+							url: "http://" + field.bucket + "." + field.endpoint.substring(7) + "/" + value.name,
+							duration: info && info.streams && info.streams[0] ? info.streams[0].duration : null,
+							size: info && info.format ? info.format.size : null,
+							width: info && info.streams && info.streams[0] ? info.streams[0].width : null,
+							height: info && info.streams && info.streams[0] ? info.streams[0].height : null,
+                            data: info,
 						}
-						next(null,data);
+                        console.log('OssVideosType', data, err);
+						next(null, data);
 					});
 				})
 			})

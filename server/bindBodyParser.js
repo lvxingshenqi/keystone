@@ -7,6 +7,9 @@ module.exports = function bindIPRestrictions (keystone, app) {
 	if (keystone.get('file limit')) {
 		bodyParserParams.limit = keystone.get('file limit');
 	}
+	if (keystone.get('upload dir')) {
+		app.use(bodyParser({uploadDir: keystone.get('upload dir')}));
+	}
 	app.use(bodyParser.json(bodyParserParams));
 	bodyParserParams.extended = true;
 	app.use(bodyParser.urlencoded(bodyParserParams));

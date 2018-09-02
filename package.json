@@ -95,7 +95,9 @@
     "string-to-stream": "1.1.0",
     "vkey": "1.0.1",
     "watchify": "3.8.0",
-    "xhr": "2.4.0"
+    "xhr": "2.4.0",
+    "exif": "^0.6.0",
+    "image-size": "^0.6.3"
   },
   "devDependencies": {
     "browserify-middleware": "7.1.0",

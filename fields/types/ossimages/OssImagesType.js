@@ -6,6 +6,18 @@ var keystone = require('../../../');
 var util = require('util');
 var ALY = require('aliyun-sdk');
 var fs=require("fs");
+var sizeOf = require('image-size');
+var ExifImage = require('exif').ExifImage;
+var orientationEnum = {
+	1: 'up', //	默认
+	3: 'down', //	180度旋转
+	5: 'left', //	逆时针旋转90度
+	7: 'right', //	顺时针旋转90度
+	2: 'up-mirrored', //	同up，但水平翻转
+	4: 'down-mirrored', //	同down，但水平翻转
+	6: 'left-mirrored', //	同left，但垂直翻转
+	8: 'right-mirrored', //	同right，但垂直翻转
+};
 
 function getEmptyValue(){
 	return {
@@ -13,11 +25,9 @@ function getEmptyValue(){
 	}
 }
 
-
 function truthy (value) {
 	return value;
 }
-
 
 function ossimages (list, path, options) {
 	this._underscoreMethods = ['format'];
@@ -40,17 +50,20 @@ function ossimages (list, path, options) {
 	this.endpoint=process.env.OSS_ENDPOINT;
 }
 
-
 ossimages.properName = 'OssImages';
 util.inherits(ossimages, FieldType);
-
 
 ossimages.prototype.addToSchema=function(schema){
 	var mongoose = keystone.mongoose;
 	var field = this;
 
 	var ImageSchema=new mongoose.Schema({
-		url:String
+		url: String,
+		orientation: String,
+		type: String,
+		width: Number,
+		height: Number,
+		exit: Object,
 	});
 
 	var src=function(img,options){
@@ -150,7 +163,6 @@ ossimages.prototype.inputIsValid = function (data) { // eslint-disable-line no-u
 	return true;
 };
 
-
 ossimages.prototype.updateItem = function (item, data, files, callback) {
 	if (typeof files === 'function') {
 		callback = files;
@@ -161,7 +173,6 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 
 	// console.log("--oss--update--debug starting...")
 	// console.log("----"+JSON.stringify(files))
-
 
 	var field=this;
 	var values = this.getValueFromData(data);
@@ -204,7 +215,6 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 	values = _.flatten(values);
 	// console.log("--oss-debug--"+JSON.stringify(values));
 
-
 	async.map(values, function (value, next) {
 		if (typeof value === 'object' && 'url' in value) {
 			// Cloudinary Image data provided
@@ -218,7 +228,7 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 			}
 		} else if (typeof value === 'object' && value.path) {
 			// File provided - upload it
-			fs.readFile(value.path,function(err,body){
+			fs.readFile(value.path, function(err, body){
 				if(err)  next(err);
 				field.oss.putObject({
 					Key:value.name,
@@ -227,14 +237,31 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 					ContentType:value.mimetype
 				},function(err,data){
 					if(err) return next(err);
-					// console.log(data);
-					data={
-						url:"http://"+field.bucket+"."+field.endpoint.substring(7)+"/"+value.name
-					}
-					next(null,data);
+					async.parallel({
+						dimensions(callback) {
+							sizeOf(value.path, callback);
+						},
+						exif(callback) {
+							try {
+							    new ExifImage({image : value.path}, callback);
+							} catch (error) {
+								callback(error, null);
+							}
+						}
+					}, function(err, result) {
+						data = {
+							url: "http://" + field.bucket + "." + field.endpoint.substring(7) + "/" + value.name,
+							orientation: result.exif && result.exif.image && result.exif.image.Orientation ? orientationEnum[result.exif.image.Orientation] : null,
+							width: result.dimensions ? result.dimensions.width : null,
+							height: result.dimensions ? result.dimensions.height : null,
+							type: result.dimensions ? result.dimensions.type : null,
+							data: result.exif
+						}
+						console.log('OssImagesType updateItem', data, err);
+						return next(null, data);
+					});
 				})
 			})
-
 		} else {
 			// Nothing to do
 			// TODO: We should really also support deleting images from cloudinary,
@@ -249,10 +276,6 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 		return callback();
 	});
 
-
-
-
 }
-
 
 module.exports=ossimages;
