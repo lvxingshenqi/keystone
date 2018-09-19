@@ -38,10 +38,14 @@ module.exports = Field.create({
 	buildInitialState (props) {
 		const uploadFieldPath = `OssVideos-${props.path}-${++uploadInc}`;
 		const thumbnails = props.value ? props.value.map((img, index) => {
+			let url = img.url;
+			if (img && img.url && img.poster && img.poster.url) {
+				url = img.poster.url.indexOf('instagram') !== -1 ? img.poster.url : img.poster.url + '?x-oss-process=video/snapshot,t_1000,f_jpg,w_800,h_600,m_fast';
+			}
 			return this.getThumbnail({
 				value: img,
-				imageSourceSmall: img.url + '?x-oss-process=video/snapshot,t_1000,f_jpg,w_800,h_600,m_fast',
-				imageSourceLarge: img.url,
+				imageSourceSmall: url,
+				imageSourceLarge: url,
 			}, index);
 		}) : [];
 		return { thumbnails, uploadFieldPath };
@@ -246,9 +250,15 @@ module.exports = Field.create({
 		const { value } = this.props;
 		if (!value || !value.length) return;
 
-		const images = value.map(image => ({
-			src: image.url + '?x-oss-process=video/snapshot,t_2000,f_jpg,w_800,h_600,m_fast'
-		}));
+		const images = value.map(function(image) {
+			let url = image.url;
+			if (image && image.url && image.poster && image.poster.url) {
+				url = image.poster.url.indexOf('instagram') !== -1 ? image.poster.url : image.poster.url + '?x-oss-process=video/snapshot,t_1000,f_jpg,w_800,h_600,m_fast';
+			}
+			return {
+				src: url
+			}
+		});
 
 		return (
 			<Lightbox

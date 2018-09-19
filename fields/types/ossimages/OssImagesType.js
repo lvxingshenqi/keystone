@@ -48,6 +48,7 @@ function ossimages (list, path, options) {
 	})
 	this.bucket=process.env.OSS_BUCKET;
 	this.endpoint=process.env.OSS_ENDPOINT;
+	this.domain=process.env.OSS_DOMAIN;
 }
 
 ossimages.properName = 'OssImages';
@@ -59,11 +60,14 @@ ossimages.prototype.addToSchema=function(schema){
 
 	var ImageSchema=new mongoose.Schema({
 		url: String,
+		filename: String,
+		domain: String,
 		orientation: String,
-		type: String,
 		width: Number,
 		height: Number,
-		exit: Object,
+		size: Number,
+		type: String,
+		data: Object,
 	});
 
 	var src=function(img,options){
@@ -238,26 +242,36 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 				},function(err,data){
 					if(err) return next(err);
 					async.parallel({
+						stats(callback) {
+							fs.stat(value.path, callback);
+						},
 						dimensions(callback) {
 							sizeOf(value.path, callback);
 						},
 						exif(callback) {
 							try {
-							    new ExifImage({image : value.path}, callback);
+							    new ExifImage({image : value.path}, function(err, result) {
+									// err && console.error('OssImagesType ExifImage error', err);
+									callback(null, result);
+								});
 							} catch (error) {
-								callback(error, null);
+								// console.error('OssImagesType exif error', error);
+								callback(null, null);
 							}
 						}
 					}, function(err, result) {
 						data = {
-							url: "http://" + field.bucket + "." + field.endpoint.substring(7) + "/" + value.name,
+							url: field.domain + "/" + value.name,
+							filename: value.name,
+							domain: field.domain,
 							orientation: result.exif && result.exif.image && result.exif.image.Orientation ? orientationEnum[result.exif.image.Orientation] : null,
 							width: result.dimensions ? result.dimensions.width : null,
 							height: result.dimensions ? result.dimensions.height : null,
+							size: result.stats ? result.stats.size : null,
 							type: result.dimensions ? result.dimensions.type : null,
 							data: result.exif
 						}
-						console.log('OssImagesType updateItem', data, err);
+						console.log('OssImagesType updateItem', data);
 						return next(null, data);
 					});
 				})

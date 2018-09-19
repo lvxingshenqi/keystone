@@ -38,6 +38,7 @@ function ossvideos (list, path, options) {
 	})
 	this.bucket=process.env.OSS_BUCKET;
 	this.endpoint=process.env.OSS_ENDPOINT;
+    this.domain=process.env.OSS_DOMAIN;
 }
 
 
@@ -50,11 +51,15 @@ ossvideos.prototype.addToSchema=function(schema){
 	var field = this;
 
 	var VideoSchema=new mongoose.Schema({
+        domain:String,
 		url:String,
+		filename:String,
 		duration:Number,
 		size:Number,
 		width:Number,
 		height:Number,
+        data:Object,
+		poster:Object,
 	});
 
 	var src=function(img,options){
@@ -233,7 +238,9 @@ ossvideos.prototype.updateItem = function (item, data, files, callback) {
 					if(err) return next(err);
 					ffprobe(value.path, {path: ffprobeStatic.path}, function (err, info) {
                         data = {
-							url: "http://" + field.bucket + "." + field.endpoint.substring(7) + "/" + value.name,
+                            url: field.domain + "/" + value.name,
+                            filename: value.name,
+                            domain: field.domain,
 							duration: info && info.streams && info.streams[0] ? info.streams[0].duration : null,
 							size: info && info.format ? info.format.size : null,
 							width: info && info.streams && info.streams[0] ? info.streams[0].width : null,
