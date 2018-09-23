@@ -2,7 +2,7 @@ const assign = require('object-assign');
 
 module.exports=function(req,res){
 	let conditions={};
-	let options={limit:1,sort:{"insertDate":-1}}
+	let options={limit:1,sort:{"date":-1, "insertDate":-1}}
 	assign(conditions,req.query);
 
 	req.list.model.find(conditions,null,options,function(err,items){

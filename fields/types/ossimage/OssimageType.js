@@ -29,12 +29,12 @@ function truthy (value) {
 	return value;
 }
 
-function ossimages (list, path, options) {
+function ossimage (list, path, options) {
 	this._underscoreMethods = ['format'];
 	this._fixedSize = 'full';
 	this._properties = ['select', 'selectPrefix', 'autoCleanup', 'publicID', 'folder', 'filenameAsPublicID'];
 
-	ossimages.super_.call(this, list, path, options);
+	ossimage.super_.call(this, list, path, options);
 
 	// validate cloudinary config
 	if(!process.env.OSS_ID||!process.env.OSS_SECRETKEY||!process.env.OSS_ENDPOINT){
@@ -51,10 +51,10 @@ function ossimages (list, path, options) {
 	this.domain=process.env.OSS_DOMAIN;
 }
 
-ossimages.properName = 'OssImages';
-util.inherits(ossimages, FieldType);
+ossimage.properName = 'OssImage';
+util.inherits(ossimage, FieldType);
 
-ossimages.prototype.addToSchema=function(schema){
+ossimage.prototype.addToSchema=function(schema){
 	var mongoose = keystone.mongoose;
 	var field = this;
 
@@ -114,69 +114,68 @@ ossimages.prototype.addToSchema=function(schema){
 		return src(this, addSize({ crop: 'thumb', gravity: 'faces' }, width, height, options));
 	});
 
-	schema.add(this._path.addTo({}, [ImageSchema]));
+	schema.add(this._path.addTo({}, ImageSchema));
 
-	this.removeImage = function (item, id, method, callback) {
-		var images = item.get(field.path);
-		if (typeof id !== 'number') {
-			for (var i = 0; i < images.length; i++) {
-				if (images[i].filename === id) {
-					id = i;
-					break;
-				}
-			}
-		}
-		// console.log("-----oss--remove"+id);
-		var img = images[id];
-		if (!img) return;
-		if (method === 'delete') {
-			field.oss.deleteObject({
-				Bucket:field.bucket,
-				Key:img.filename
-			},function(){})
-		}
-		images.splice(id, 1);
-		if (callback) {
-			item.save((typeof callback !== 'function') ? callback : undefined);
-		}
-	};
-	this.underscoreMethod('remove', function (id, callback) {
-		field.removeImage(this, id, 'remove', callback);
-	});
-	this.underscoreMethod('delete', function (id, callback) {
-		field.removeImage(this, id, 'delete', callback);
-	});
+	// this.removeImage = function (item, id, method, callback) {
+	// 	var images = item.get(field.path);
+	// 	if (typeof id !== 'number') {
+	// 		for (var i = 0; i < images.length; i++) {
+	// 			if (images[i].filename === id) {
+	// 				id = i;
+	// 				break;
+	// 			}
+	// 		}
+	// 	}
+	// 	// console.log("-----oss--remove"+id);
+	// 	var img = images[id];
+	// 	if (!img) return;
+	// 	if (method === 'delete') {
+	// 		field.oss.deleteObject({
+	// 			Bucket:field.bucket,
+	// 			Key:img.filename
+	// 		},function(){})
+	// 	}
+	// 	images.splice(id, 1);
+	// 	if (callback) {
+	// 		item.save((typeof callback !== 'function') ? callback : undefined);
+	// 	}
+	// };
+	// this.underscoreMethod('remove', function (id, callback) {
+	// 	field.removeImage(this, id, 'remove', callback);
+	// });
+	// this.underscoreMethod('delete', function (id, callback) {
+	// 	field.removeImage(this, id, 'delete', callback);
+	// });
 
 	this.bindUnderscoreMethods();
 
 }
 
-ossimages.prototype.format = function (item) {
-	return _.map(item.get(this.path), function (img) {
-		return img.src();
-	}).join(', ');
-};
+// ossimage.prototype.format = function (item) {
+// 	return _.map(item.get(this.path), function (img) {
+// 		return img.src();
+// 	}).join(', ');
+// };
 
-ossimages.prototype.getData = function (item) {
+ossimage.prototype.getData = function (item) {
 	var value = item.get(this.path);
-	// console.log('OssImagesType getData', this.path, item, value, Array.isArray(value) ? value : []);
-	return Array.isArray(value) ? value : [];
+	console.log('OssImageType getData', this.path, item, value, typeof value === 'object' ? value : {});
+	return typeof value === 'object' ? value : {};
 };
 
-ossimages.prototype.inputIsValid = function (data) { // eslint-disable-line no-unused-vars
-	// TODO - how should image field input be validated?
-	return true;
-};
+// ossimage.prototype.inputIsValid = function (data) { // eslint-disable-line no-unused-vars
+// 	// TODO - how should image field input be validated?
+// 	return true;
+// };
 
-ossimages.prototype.updateItem = function (item, data, files, callback) {
-	// console.log('OssImagesType updateItem', item, data, files);
+ossimage.prototype.updateItem = function (item, data, files, callback) {
+	console.log('OssImageType updateItem', item, data, files);
 	if (typeof files === 'function') {
 		callback = files;
 		files = {};
 	} else if (!files) {
 		files = {};
 	}
-
 	// console.log("--oss--update--debug starting...")
 	// console.log("----"+JSON.stringify(files))
 
@@ -188,7 +187,7 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 		item.set(field.path,[]);
 		return process.nextTick(callback);
 	}
-
+	console.log('OssImageType updateItem values', values);
 	if (!Array.isArray(values)) {
 		values = [values];
 	}
@@ -253,11 +252,11 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 						exif(callback) {
 							try {
 							    new ExifImage({image : value.path}, function(err, result) {
-									// err && console.error('OssImagesType ExifImage error', err);
+									// err && console.error('OssImageType ExifImage error', err);
 									callback(null, result);
 								});
 							} catch (error) {
-								// console.error('OssImagesType exif error', error);
+								// console.error('OssImageType exif error', error);
 								callback(null, null);
 							}
 						}
@@ -286,11 +285,11 @@ ossimages.prototype.updateItem = function (item, data, files, callback) {
 	}, function (err, result) {
 		if (err) return callback(err);
 		result = result.filter(truthy);
-		// console.log("--oss-debug"+JSON.stringify(result))
 		item.set(field.path, result);
+		console.log("Ossimage", field.path, result);
 		return callback();
 	});
 
 }
 
-module.exports=ossimages;
+module.exports=ossimage;

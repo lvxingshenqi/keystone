@@ -61,6 +61,7 @@ var EditForm = React.createClass({
 			loadingNext: false,
 			loadingPub: false,
 			loadingPubNext: false,
+			loadingHandledAndNext: false,
 			lastValues: null, // used for resetting
 			focusFirstField: !this.props.list.nameField && !this.props.list.nameFieldIsFormHeader,
 		};
@@ -163,9 +164,7 @@ var EditForm = React.createClass({
 	//进入下一条草稿
 	getNext () {
 		const {data, list, router } = this.props;
-		if(list.id !== "messages"){
-			return ;
-		}else{
+		if(list.id === "messages" || list.id !== "scraper-media"){
 			this.setState({
 				loadingNext:true,
 			});
@@ -199,6 +198,8 @@ var EditForm = React.createClass({
 					})
 				}
 			})
+		} else {
+			return;
 		}
 	},
 	//保存发布
@@ -208,8 +209,7 @@ var EditForm = React.createClass({
 		const formData = new FormData(editForm);
 		//强制将状态变成发布
 		if(formData.has("status")){
-			formData.set("status","published");
-			formData.has("publishedDate")?formData.set("publishedDate",new Date().toISOString()):formData.append("publishedDate",new Date().toISOString());
+			formData.set("status","publish");
 		}
 
 		// Show loading indicator
@@ -250,9 +250,8 @@ var EditForm = React.createClass({
 		const editForm = this.refs.editForm;
 		const formData = new FormData(editForm);
 		//强制将状态变成发布
-		if(formData.has("status")){
-			formData.set("status","published");
-			formData.has("publishedDate")?formData.set("publishedDate",new Date().toISOString()):formData.append("publishedDate",new Date().toISOString());
+		if (formData.has("status")) {
+			formData.set("status", "publish");
 		}
 		this.setState({
 			loadingPubNext: true,
@@ -260,22 +259,10 @@ var EditForm = React.createClass({
 		var that=this
 		series([
 			function(callback){
-				list.updateItem(data.id, formData, (err, data) => {
-					if(err){
-						callback(err)
-					}else{
-						callback(null,data)
-					}
-				})
+				list.updateItem(data.id, formData, callback)
 			},
 			function(callback){
-				list.loadNext({status:'draft'}, (err,item) => {
-					if(err){
-						callback(err)
-					}else{
-						callback(null, item)
-					}
-				})
+				list.loadNext({status:'draft'}, callback)
 			}],
 			function(err,results){
 				smoothScrollTop();
@@ -292,6 +279,50 @@ var EditForm = React.createClass({
 						var item=results[1]
 						that.setState({
 							loadingPubNext: false,
+						},function(){
+							router.push({
+								pathname: '/backend/'+list.id+'/'+item.result._id
+							});
+						})
+					}
+			})
+
+	},
+	//已处理并且进入下一条
+	handledAndNext(){
+		const {data, list, router } = this.props;
+		const editForm = this.refs.editForm;
+		const formData = new FormData(editForm);
+		//强制将状态变成发布
+		if (formData.has("status")) {
+			formData.set("status", "handled");
+		}
+		this.setState({
+			loadingHandledAndNext: true,
+		});
+		var that=this
+		series([
+			function(callback){
+				list.updateItem(data.id, formData, callback)
+			},
+			function(callback){
+				list.loadNext({status:'draft'}, callback)
+			}],
+			function(err,results){
+				smoothScrollTop();
+					if(err){
+						that.setState({
+							alerts: {
+								error: {
+									error:err.err
+								},
+							},
+							loadingHandledAndNext: false,
+						});
+					}else{
+						var item=results[1]
+						that.setState({
+							loadingHandledAndNext: false,
 						},function(){
 							router.push({
 								pathname: '/backend/'+list.id+'/'+item.result._id
@@ -378,8 +409,7 @@ var EditForm = React.createClass({
 				&& el.field === this.props.list.nameField.path
 				&& this.props.list.nameFieldIsFormHeader
 			) return;
-
-			if(this.props.list.id == "messages" && (
+			if((this.props.list.id == "messages" || this.props.list.id == "scraper-media") && (
 				(el.type == "heading" && el.content == "Meta") ||
 				(el.type == "field" && el.field == "createdAt") ||
 				(el.type == "field" && el.field == "createdBy") ||
@@ -416,11 +446,12 @@ var EditForm = React.createClass({
 			return null;
 		}
 
-		const { loading, loadingNext, loadingPub, loadingPubNext } = this.state;
+		const { loading, loadingNext, loadingPub, loadingPubNext, loadingHandledAndNext } = this.state;
 		const loadingButtonText = loading ? 'Saving' : '保存';
-		const loadingButtonNext = loadingNext ? 'Nexting' : '下一个草稿';
-		const loadingButtonPubSave = loadingPub ? 'PubSaving' : '保存并发布';
-		const loadingButtonPubNext = loadingPubNext ? 'PubNexting' : '保存&发布&下一个草稿';
+		// const loadingButtonNext = loadingNext ? 'Nexting' : '下一个草稿';
+		// const loadingButtonPubSave = loadingPub ? 'PubSaving' : '保存并发布';
+		const loadingButtonPubNext = loadingPubNext ? 'PubNexting' : '发布&下一个草稿';
+		const loadingButtonHandledAndNext = loadingHandledAndNext ? 'HandledAndNext' : '处理&下一个草稿';
 
 		// Padding must be applied inline so the FooterBar can determine its
 		// innerHeight at runtime. Aphrodite's styling comes later...
@@ -439,7 +470,7 @@ var EditForm = React.createClass({
 							{loadingButtonText}
 						</LoadingButton>
 					)}
-					{!this.props.list.noedit && this.props.list.id=="messages"&&(
+					{/* {!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
 						<LoadingButton
 							color="primary"
 							style={{marginLeft:'10px'}}
@@ -450,8 +481,8 @@ var EditForm = React.createClass({
 						>
 							{loadingButtonNext}
 						</LoadingButton>
-					)}
-					{!this.props.list.noedit && this.props.list.id=="messages"&&(
+					)} */}
+					{/* {!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
 						<LoadingButton
 							color="primary"
 							style={{marginLeft:'10px'}}
@@ -462,8 +493,8 @@ var EditForm = React.createClass({
 						>
 							{loadingButtonPubSave}
 						</LoadingButton>
-					)}
-					{!this.props.list.noedit && this.props.list.id=="messages"&&(
+					)} */}
+					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
 						<LoadingButton
 							color="primary"
 							style={{marginLeft:'10px'}}
@@ -473,6 +504,18 @@ var EditForm = React.createClass({
 							data-button="pub&next"
 						>
 							{loadingButtonPubNext}
+						</LoadingButton>
+					)}
+					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
+						<LoadingButton
+							color="primary"
+							style={{marginLeft:'10px'}}
+							disabled={loadingHandledAndNext}
+							loading={loadingHandledAndNext}
+							onClick={this.handledAndNext}
+							data-button="pub&next"
+						>
+							{loadingButtonHandledAndNext}
 						</LoadingButton>
 					)}
 					{!this.props.list.noedit && (

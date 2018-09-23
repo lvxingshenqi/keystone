@@ -125,9 +125,9 @@ var PrimaryNavigation = React.createClass({
 				<Container clearFloatingChildren>
 					<ul className="app-nav app-nav--primary app-nav--left">
 						{this.renderBrand()}
+						{this.renderFrontLink()}
 						{this.renderNavigation()}
 					</ul>
-					{this.renderFrontLink()}
 				</Container>
 			</nav>
 		);

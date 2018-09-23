@@ -4,7 +4,7 @@ import React, { cloneElement } from 'react';
 import Field from '../Field';
 import { Button, FormField, FormNote } from '../../../admin/client/App/elemental';
 import Lightbox from 'react-images';
-import Thumbnail from './OssImagesThumbnail';
+import Thumbnail from './OssImageThumbnail';
 import HiddenFileInput from '../../components/HiddenFileInput';
 import FileChangeMessage from '../../components/FileChangeMessage';
 
@@ -18,16 +18,16 @@ const RESIZE_DEFAULTS = {
 let uploadInc = 1000;
 
 module.exports = Field.create({
-	displayName: 'OssImagesField',
+	displayName: 'OssImageField',
 	statics: {
-		type: 'OssImages',
+		type: 'OssImage',
 		getDefaultValue: () => ([]),
 	},
 	getInitialState () {
 		return this.buildInitialState(this.props);
 	},
 	componentWillUpdate (nextProps) {
-		// Reset the thumbnails and upload ID when the item value changes
+		// Reset the thumbnail and upload ID when the item value changes
 		// TODO: We should add a check for a new item ID in the store
 		const value = _.map(this.props.value, 'url').join();
 		const nextValue = _.map(nextProps.value, 'url').join();
@@ -36,15 +36,13 @@ module.exports = Field.create({
 		}
 	},
 	buildInitialState (props) {
-		const uploadFieldPath = `OssImages-${props.path}-${++uploadInc}`;
-		const thumbnails = props.value ? props.value.map((img, index) => {
-			return this.getThumbnail({
-				value: img,
-				imageSourceSmall: img.url,
-				imageSourceLarge: img.url,
-			}, index);
-		}) : [];
-		return { thumbnails, uploadFieldPath };
+		const uploadFieldPath = `OssImage-${props.path}-${++uploadInc}`;
+		const thumbnail = this.getThumbnail({
+			value: props.value,
+			imageSourceSmall: props.value.url,
+			imageSourceLarge: props.value.url,
+		}, 0);
+		return { thumbnail, uploadFieldPath };
 	},
 	getThumbnail (props, index) {
 		return (
@@ -82,23 +80,12 @@ module.exports = Field.create({
 			lightboxImageIndex: null,
 		});
 	},
-	lightboxPrevious () {
-		this.setState({
-			lightboxImageIndex: this.state.lightboxImageIndex - 1,
-		});
-	},
-	lightboxNext () {
-		this.setState({
-			lightboxImageIndex: this.state.lightboxImageIndex + 1,
-		});
-	},
-
 	// ==============================
 	// METHODS
 	// ==============================
 
 	removeImage (index) {
-		const newThumbnails = [...this.state.thumbnails];
+		const newThumbnails = [...this.state.thumbnail];
 		const target = newThumbnails[index];
 
 		// Use splice + clone to toggle the isDeleted prop
@@ -106,14 +93,12 @@ module.exports = Field.create({
 			isDeleted: !target.props.isDeleted,
 		}));
 
-		this.setState({ thumbnails: newThumbnails });
+		this.setState({ thumbnail: newThumbnails });
 	},
 	getCount (key) {
 		var count = 0;
 
-		this.state.thumbnails.forEach((thumb) => {
-			if (thumb && thumb.props[key]) count++;
-		});
+		if (this.state.thumbnail && this.state.thumbnail.props[key]) count++;
 
 		return count;
 	},
@@ -121,9 +106,7 @@ module.exports = Field.create({
 		this.refs.fileInput.clearValue();
 
 		this.setState({
-			thumbnails: this.state.thumbnails.filter(function (thumb) {
-				return !thumb.props.isQueued;
-			}),
+			thumbnail: !this.state.thumbnail.props.isQueued,
 		});
 	},
 	uploadFile (event) {
@@ -141,7 +124,7 @@ module.exports = Field.create({
 			files.push(f);
 		}
 
-		let index = this.state.thumbnails.length;
+		let index = 1;
 		async.mapSeries(files, (file, callback) => {
 			const reader = new FileReader();
 			reader.readAsDataURL(file);
@@ -151,9 +134,9 @@ module.exports = Field.create({
 					imageSourceSmall: e.target.result,
 				}, index++));
 			};
-		}, (err, thumbnails) => {
+		}, (err, thumbnail) => {
 			this.setState({
-				thumbnails: [...this.state.thumbnails, ...thumbnails],
+				thumbnail: {...this.state.thumbnail, ...thumbnail},
 			});
 		});
 	},
@@ -169,7 +152,6 @@ module.exports = Field.create({
 			<HiddenFileInput
 				accept={SUPPORTED_TYPES.join()}
 				key={this.state.uploadFieldPath}
-				multiple
 				name={this.state.uploadFieldPath}
 				onChange={this.uploadFile}
 				ref="fileInput"
@@ -203,17 +185,15 @@ module.exports = Field.create({
 		const { value } = this.props;
 		if (!value || !value.length) return;
 
-		const images = value.map(image => ({
-			src: image.url
-		}));
+		const images = [{
+			src: value.url
+		}];
 
 		return (
 			<Lightbox
 				images={images}
 				currentImage={this.state.lightboxImageIndex}
 				isOpen={this.state.lightboxIsVisible}
-				onClickPrev={this.lightboxPrevious}
-				onClickNext={this.lightboxNext}
 				onClose={this.closeLightbox}
 			/>
 		);
@@ -254,7 +234,7 @@ module.exports = Field.create({
 		return (
 			<div style={toolbarStyles}>
 				<Button onClick={this.triggerFileBrowser} style={uploadButtonStyles} data-e2e-upload-button="true">
-					上传多张图片
+					上传图片
 				</Button>
 				{this.hasFiles() && (
 					<Button variant="link" color="cancel" onClick={this.clearFiles}>
@@ -268,12 +248,12 @@ module.exports = Field.create({
 	},
 	renderUI () {
 		const { label, note, path } = this.props;
-		const { thumbnails } = this.state;
+		const { thumbnail } = this.state;
 
 		return (
-			<FormField label={label} className="field-type-cloudinaryimages" htmlFor={path}>
+			<FormField label={label} className="field-type-cloudinaryimage" htmlFor={path}>
 				<div>
-					{thumbnails}
+					{thumbnail}
 				</div>
 				{this.renderValueInput()}
 				{this.renderFileInput()}
