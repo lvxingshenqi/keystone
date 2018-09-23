@@ -21,10 +21,10 @@ var UrlColumn = React.createClass({
 
 		// strip the protocol from the link if it's http(s)
 		var label = value.replace(/^https?\:\/\//i, '');
-
+		var image = {url: value};
 		return (
 			<ItemsTableValue padded exterior field={this.props.col.type}>
-				<CloudinaryImageSummary label="dimensions" image={value} secure={this.props.col.field.secure} />
+				<CloudinaryImageSummary label="dimensions" image={image} secure={this.props.col.field.secure} />
 			</ItemsTableValue>
 		);
 	},
