@@ -2,7 +2,21 @@ const assign = require('object-assign');
 
 module.exports=function(req,res){
 	let conditions={};
-	let options={limit:1,sort:{"date":-1, "insertDate":-1}}
+	let options={limit:1,sort:{"record_date": 1, "date":-1, "insertDate":-1}}
+	if (req.query.status === 'pending') {
+		delete req.query.status;
+		req.query['$or'] = [
+			{
+				status: 'pending'
+			}, {
+				status: null
+			}, {
+				status: {
+					$exists: false
+				}
+			}
+		];
+	}
 	assign(conditions,req.query);
 
 	req.list.model.find(conditions,null,options,function(err,items){

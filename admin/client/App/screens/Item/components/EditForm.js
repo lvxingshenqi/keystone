@@ -161,48 +161,64 @@ var EditForm = React.createClass({
 			}
 		});
 	},
-	//进入下一条草稿
-	getNext () {
-		const {data, list, router } = this.props;
-		if(list.id === "messages" || list.id !== "scraper-media"){
-			this.setState({
-				loadingNext:true,
-			});
-			list.loadNext({status:'draft'},(err,item)=>{
-				if(err) {
-					this.setState({
-						alerts: {
-							error:{
-								error:err.err
-							}
-						},
-						loadingNext: false,
-					});
-				}else if(item.result._id === data.id){
+	loadNext(that, noMoreItemForThatAccount = false) {
+		const {data, list, router } = that.props;
+		var options = data && data.fields && data.fields.account && !noMoreItemForThatAccount ? {account: data.fields.account, status:'pending'} : {status:'pending'};
+		list.loadNext(options, function(err, item) {
+			console.log('EditForm pubAndNext loadNext', err, 'item', item, 'data', data);
+			if (!item || (item && item.result && item.result === 'no more item satisfied with options')) {
+				!noMoreItemForThatAccount && that.loadNext(that, true);
+			} else {
+				var state = {
+					loading: false,
+					loadingNext: false,
+					loadingPub: false,
+					loadingPubNext: false,
+					loadingHandledAndNext: false,
+				};
+				if (err) {
+					state.alerts = {
+						error:{
+							error:err.err
+						}
+					};
+					that.setState(state);
+				} else if(item.result._id === data.id){
 					smoothScrollTop();
-					this.setState({
-						alerts:{
-							success: {
-								success: 'Status not changed,return the same page!',
-							},
+					state.alerts = {
+						error: {
+							error: 'Status not changed,return the same page!',
 						},
-						loadingNext: false,
-					})
+					};
+					that.setState(state);
 				}else{
-					this.setState({
-						loadingNext: false,
-					},function(){
+					state.alerts = {
+						success: {
+							success: 'loadNext successed!',
+						},
+					};
+					that.setState(state ,function() {
 						router.push({
 							pathname: '/backend/'+list.id+'/'+item.result._id
 						});
 					})
 				}
-			})
+			}
+		});
+	},
+	//进入下一条草稿
+	getNext (noMoreItemForThatAccount = false) {
+		const {data, list, router } = this.props;
+		if(list.id === "messages" || list.id === "scraper-media"){
+			this.setState({
+				loadingNext:true,
+			});
+			this.loadNext(this);
 		} else {
 			return;
 		}
 	},
-	//保存发布
+	//保存并发布
 	pubAndSave() {
 		const { data, list } = this.props;
 		const editForm = this.refs.editForm;
@@ -244,7 +260,7 @@ var EditForm = React.createClass({
 			}
 		});
 	},
-	//保存发布并且进入下一条
+	//发布并且进入下一条
 	pubAndNext(){
 		const {data, list, router } = this.props;
 		const editForm = this.refs.editForm;
@@ -262,30 +278,8 @@ var EditForm = React.createClass({
 				list.updateItem(data.id, formData, callback)
 			},
 			function(callback){
-				list.loadNext({status:'draft'}, callback)
-			}],
-			function(err,results){
-				smoothScrollTop();
-					if(err){
-						that.setState({
-							alerts: {
-								error: {
-									error:err.err
-								},
-							},
-							loadingPubNext: false,
-						});
-					}else{
-						var item=results[1]
-						that.setState({
-							loadingPubNext: false,
-						},function(){
-							router.push({
-								pathname: '/backend/'+list.id+'/'+item.result._id
-							});
-						})
-					}
-			})
+				that.loadNext(that);
+			}])
 
 	},
 	//已处理并且进入下一条
@@ -306,30 +300,8 @@ var EditForm = React.createClass({
 				list.updateItem(data.id, formData, callback)
 			},
 			function(callback){
-				list.loadNext({status:'draft'}, callback)
-			}],
-			function(err,results){
-				smoothScrollTop();
-					if(err){
-						that.setState({
-							alerts: {
-								error: {
-									error:err.err
-								},
-							},
-							loadingHandledAndNext: false,
-						});
-					}else{
-						var item=results[1]
-						that.setState({
-							loadingHandledAndNext: false,
-						},function(){
-							router.push({
-								pathname: '/backend/'+list.id+'/'+item.result._id
-							});
-						})
-					}
-			})
+				that.loadNext(that);
+			}])
 
 	},
 
@@ -447,15 +419,15 @@ var EditForm = React.createClass({
 		}
 
 		const { loading, loadingNext, loadingPub, loadingPubNext, loadingHandledAndNext } = this.state;
-		const loadingButtonText = loading ? 'Saving' : '保存';
-		// const loadingButtonNext = loadingNext ? 'Nexting' : '下一个草稿';
-		// const loadingButtonPubSave = loadingPub ? 'PubSaving' : '保存并发布';
-		const loadingButtonPubNext = loadingPubNext ? 'PubNexting' : '发布&下一个草稿';
-		const loadingButtonHandledAndNext = loadingHandledAndNext ? 'HandledAndNext' : '处理&下一个草稿';
+		const loadingButtonText = loading ? '保存中' : '保存';
+		const loadingButtonNext = loadingNext ? '加载中' : '下一个 ↓↓↓';
+		const loadingButtonPubSave = loadingPub ? '保存&发布中' : '↑↑↑ 保存并发布';
+		const loadingButtonHandledAndNext = loadingHandledAndNext ? '处理并加载中' : '<<< 处理&下一个';
+		const loadingButtonPubNext = loadingPubNext ? '发布并加载中' : '发布&下一个 >>>';
 
 		// Padding must be applied inline so the FooterBar can determine its
 		// innerHeight at runtime. Aphrodite's styling comes later...
-
+		// console.log('EditForm renderFooterBar', this.props);
 		return (
 			<FooterBar style={styles.footerbar}>
 				<div style={styles.footerbarInner}>
@@ -470,19 +442,7 @@ var EditForm = React.createClass({
 							{loadingButtonText}
 						</LoadingButton>
 					)}
-					{/* {!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
-						<LoadingButton
-							color="primary"
-							style={{marginLeft:'10px'}}
-							disabled={loadingNext}
-							loading={loadingNext}
-							onClick={this.getNext}
-							data-button="next"
-						>
-							{loadingButtonNext}
-						</LoadingButton>
-					)} */}
-					{/* {!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
+					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media" || this.props.list.id=="scraper-accounts")&&(
 						<LoadingButton
 							color="primary"
 							style={{marginLeft:'10px'}}
@@ -493,8 +453,32 @@ var EditForm = React.createClass({
 						>
 							{loadingButtonPubSave}
 						</LoadingButton>
-					)} */}
-					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
+					)}
+					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media" || this.props.list.id=="scraper-accounts")&&(
+						<LoadingButton
+							color="primary"
+							style={{marginLeft:'10px'}}
+							disabled={loadingNext}
+							loading={loadingNext}
+							onClick={this.getNext}
+							data-button="next"
+						>
+							{loadingButtonNext}
+						</LoadingButton>
+					)}
+					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media" || this.props.list.id=="scraper-accounts")&&(
+						<LoadingButton
+							color="primary"
+							style={{marginLeft:'10px'}}
+							disabled={loadingHandledAndNext}
+							loading={loadingHandledAndNext}
+							onClick={this.handledAndNext}
+							data-button="handled&next"
+						>
+							{loadingButtonHandledAndNext}
+						</LoadingButton>
+					)}
+					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media" || this.props.list.id=="scraper-accounts")&&(
 						<LoadingButton
 							color="primary"
 							style={{marginLeft:'10px'}}
@@ -504,18 +488,6 @@ var EditForm = React.createClass({
 							data-button="pub&next"
 						>
 							{loadingButtonPubNext}
-						</LoadingButton>
-					)}
-					{!this.props.list.noedit && (this.props.list.id=="messages" || this.props.list.id=="scraper-media")&&(
-						<LoadingButton
-							color="primary"
-							style={{marginLeft:'10px'}}
-							disabled={loadingHandledAndNext}
-							loading={loadingHandledAndNext}
-							onClick={this.handledAndNext}
-							data-button="pub&next"
-						>
-							{loadingButtonHandledAndNext}
 						</LoadingButton>
 					)}
 					{!this.props.list.noedit && (
@@ -608,6 +580,8 @@ var EditForm = React.createClass({
 	},
 	render () {
 		var list=this.props.list;
+		// console.log('this.props.list.uiElements', this.props.list.uiElements);
+
 		return (
 			<form ref="editForm" className="EditForm-container">
 				{(this.state.alerts) ? <AlertMessages alerts={this.state.alerts} /> : null}
@@ -641,7 +615,27 @@ var EditForm = React.createClass({
 							</Form>
 						</Grid.Col>
 					</Grid.Row>
-				):(
+				): ( list.id=="scraper-media"?(
+				<Grid.Row>
+					<Grid.Col large="one-third">
+						<Form layout="horizontal" component="div" style={{marginRight:20}}>
+							{this.renderNameField()}
+							{/* {this.renderKeyOrId()} */}
+							{this.renderFormElementsBase(this.props.list.uiElements.slice(0, 11))}
+							{/* {this.renderTrackingMeta()} */}
+						</Form>
+					</Grid.Col>
+					<Grid.Col large="two-thirds">
+						<Form layout="horizontal" component="div" style={{marginRight:20}}>
+							 {/* style={{marginLeft:'20px',marginRight:'30px',position:"fixed",top:"300px"}}> */}
+							{/* {this.renderNameField()} */}
+							{/* {this.renderKeyOrId()} */}
+							{this.renderFormElementsBase(this.props.list.uiElements.slice(11))}
+							{/* {this.renderTrackingMeta()} */}
+						</Form>
+					</Grid.Col>
+				</Grid.Row>
+			): (
 					<Grid.Row>
 						<Grid.Col large="three-quarters">
 							<Form layout="horizontal" component="div">
@@ -657,7 +651,7 @@ var EditForm = React.createClass({
 							</Form>
 						</Grid.Col>
 					</Grid.Row>
-				)
+				))
 				}
 				{this.renderFooterBar()}
 				<ConfirmationDialog

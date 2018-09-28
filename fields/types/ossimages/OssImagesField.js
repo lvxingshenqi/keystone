@@ -47,6 +47,7 @@ module.exports = Field.create({
 		return { thumbnails, uploadFieldPath };
 	},
 	getThumbnail (props, index) {
+		console.log('getThumbnail this.props', this.props);
 		return (
 			<Thumbnail
 				key={`thumbnail-${index}`}

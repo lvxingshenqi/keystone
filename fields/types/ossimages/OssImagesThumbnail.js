@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import { Button } from '../../../admin/client/App/elemental';
 import ImageThumbnail from '../../components/ImageThumbnail';
 
-function CloudinaryImagesThumbnail ({
+function OssImagesThumbnail ({
 	isDeleted,
 	imageSourceLarge,
 	imageSourceSmall,
@@ -46,7 +46,7 @@ function CloudinaryImagesThumbnail ({
 				mask={mask}
 				target={!!imageSourceLarge && '__blank'}
 			>
-				<img src={imageSourceSmall} style={{ height: 90 }} />
+				<img src={imageSourceSmall} style={{ width: 350 }} />
 			</ImageThumbnail>
 			{actionButton}
 			{input}
@@ -55,7 +55,7 @@ function CloudinaryImagesThumbnail ({
 
 };
 
-CloudinaryImagesThumbnail.propTypes = {
+OssImagesThumbnail.propTypes = {
 	imageSourceLarge: PropTypes.string,
 	imageSourceSmall: PropTypes.string.isRequired,
 	isDeleted: PropTypes.bool,
@@ -65,4 +65,4 @@ CloudinaryImagesThumbnail.propTypes = {
 	toggleDelete: PropTypes.func.isRequired,
 };
 
-module.exports = CloudinaryImagesThumbnail;
+module.exports = OssImagesThumbnail;

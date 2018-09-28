@@ -67,7 +67,7 @@ var SecondaryNavigation = React.createClass({
 
 		return (
 			<ul className="app-nav app-nav--secondary app-nav--left">
-				{navigation}
+				{/* {navigation} */}
 			</ul>
 		);
 	},

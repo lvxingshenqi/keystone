@@ -3,7 +3,7 @@ import CloudinaryImageSummary from '../../components/columns/CloudinaryImageSumm
 import ItemsTableCell from '../../components/ItemsTableCell';
 import ItemsTableValue from '../../components/ItemsTableValue';
 
-var UrlColumn = React.createClass({
+var ImageUrlColumn = React.createClass({
 	displayName: 'ImageUrlColumn',
 	propTypes: {
 		col: React.PropTypes.object,
@@ -24,7 +24,7 @@ var UrlColumn = React.createClass({
 		var image = {url: value};
 		return (
 			<ItemsTableValue padded exterior field={this.props.col.type}>
-				<CloudinaryImageSummary label="dimensions" image={image} secure={this.props.col.field.secure} />
+				<CloudinaryImageSummary image={image}/>
 			</ItemsTableValue>
 		);
 	},
@@ -37,4 +37,4 @@ var UrlColumn = React.createClass({
 	},
 });
 
-module.exports = UrlColumn;
+module.exports = ImageUrlColumn;

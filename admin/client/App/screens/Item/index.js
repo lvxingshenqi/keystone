@@ -78,9 +78,10 @@ var ItemView = React.createClass({
 		const { relationships } = this.props.currentList;
 		const keys = Object.keys(relationships);
 		if (!keys.length) return;
+		var containerStyle = {maxWidth: '100%'};
 		return (
 			<div className="Relationships">
-				<Container>
+				<Container style={containerStyle}>
 					<h2>Relationships</h2>
 					{keys.map(key => {
 						const relationship = relationships[key];
@@ -158,7 +159,7 @@ var ItemView = React.createClass({
 			MozTransition: 'max-width 160ms ease-out',
 			WebkitTransition: 'max-width 160ms ease-out',
 		};
-		if (this.props.routeParams && this.props.routeParams.listId === "messages") {
+		if (this.props.routeParams && (this.props.routeParams.listId === "messages" || this.props.routeParams.listId === "scraper-media")) {
 			containerStyle.maxWidth = '100%';
 		}
 

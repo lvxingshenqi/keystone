@@ -119,10 +119,13 @@ var PrimaryNavigation = React.createClass({
 	},
 	render () {
 		if (!this.state.navIsVisible) return null;
-
+		const containerStyle = {};
+		if (!this.state.constrainTableWidth || this.state.customConstrainTableWidth) {
+			containerStyle.maxWidth = '100%';
+		}
 		return (
 			<nav className="primary-navbar">
-				<Container clearFloatingChildren>
+				<Container clearFloatingChildren style={containerStyle}>
 					<ul className="app-nav app-nav--primary app-nav--left">
 						{this.renderBrand()}
 						{this.renderFrontLink()}
