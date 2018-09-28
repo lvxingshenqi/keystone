@@ -26,6 +26,7 @@ import InvalidFieldType from '../../../shared/InvalidFieldType';
 import { deleteItem } from '../actions';
 
 import { upcase } from '../../../../utils/string';
+import { HotKeys } from 'react-hotkeys';
 
 function getNameFromData (data) {
 	if (typeof data === 'object') {
@@ -72,6 +73,11 @@ var EditForm = React.createClass({
 	componentWillUnmount () {
 		this.__isMounted = false;
 	},
+	componentDidUpdate(prevProps) {
+        if(!prevProps.isFocused && this.props.isFocused) {
+            this._hotkeyContainer.focus();
+        }
+    },
 	getFieldProps (field) {
 		const props = assign({}, field);
 		const alerts = this.state.alerts;
@@ -582,7 +588,21 @@ var EditForm = React.createClass({
 		var list=this.props.list;
 		// console.log('this.props.list.uiElements', this.props.list.uiElements);
 
+		const hotkeyMap = {
+			pubAndSaveHotkeys: 'up',
+			getNextHotkeys: 'down',
+			handledAndNextHotkeys: 'left',
+	      	pubAndNextHotkeys: 'right',
+	    };
+		const hotkeyHandlers = {
+            pubAndSaveHotkeys: this.pubAndSave.bind(this),
+            getNextHotkeys: this.getNext.bind(this),
+            handledAndNextHotkeys: this.handledAndNext.bind(this),
+            pubAndNextHotkeys: this.pubAndNext.bind(this),
+        };
+
 		return (
+			<HotKeys keyMap={hotkeyMap} handlers={hotkeyHandlers} ref={ (c) => this._hotkeyContainer = c } tabIndex="0">
 			<form ref="editForm" className="EditForm-container">
 				{(this.state.alerts) ? <AlertMessages alerts={this.state.alerts} /> : null}
 				{
@@ -674,6 +694,7 @@ var EditForm = React.createClass({
 					This cannot be undone.
 				</ConfirmationDialog>
 			</form>
+			</HotKeys>
 		);
 	},
 });
