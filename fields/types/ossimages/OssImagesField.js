@@ -55,6 +55,7 @@ module.exports = Field.create({
 				openLightbox={(e) => this.openLightbox(e, index)}
 				shouldRenderActionButton={this.shouldRenderField()}
 				toggleDelete={this.removeImage.bind(this, index)}
+				thumbSize={350}
 				{...props}
 			/>
 		);

@@ -18,9 +18,10 @@ var TextColumn = React.createClass({
 		const value = this.getValue();
 		const empty = !value && this.props.linkTo ? true : false;
 		const className = this.props.col.field.monospace ? 'ItemList__value--monospace' : undefined;
+		const isScraperMedia = this.props.list.id === 'scraper-media' && this.props.col.path === 'text';
 		return (
 			<ItemsTableCell>
-				<ItemsTableValue className={className} to={this.props.linkTo} empty={empty} padded interior field={this.props.col.type}>
+				<ItemsTableValue className={className} to={this.props.linkTo} empty={empty} padded interior field={this.props.col.type} truncate={!isScraperMedia}>
 					{value}
 				</ItemsTableValue>
 			</ItemsTableCell>

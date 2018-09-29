@@ -7,7 +7,7 @@ import React from 'react';
 // import { findDOMNode } from 'react-dom'; // TODO re-implement focus when ready
 import numeral from 'numeral';
 import { connect } from 'react-redux';
-
+var _ = require('lodash');
 import {
 	BlankState,
 	Center,
@@ -34,6 +34,7 @@ import { checkForQueryChange } from '../../../utils/queryParams';
 
 import {
 	deleteItems,
+	updateItemsStatus,
 	setActiveSearch,
 	setActiveSort,
 	setCurrentPage,
@@ -174,6 +175,34 @@ const ListView = React.createClass({
 			},
 		});
 	},
+	updateStatus (status, uncheckStatus) {
+		const { checkedItems } = this.state;
+		const list = this.props.currentList;
+		const itemCount = pluralize(checkedItems, ('* ' + list.singular.toLowerCase()), ('* ' + list.plural.toLowerCase()));
+		const itemIds = Object.keys(checkedItems);
+		const ids = _.map(this.props.items.results, 'id');
+		const uncheckItemIds = _.difference(ids, itemIds);
+		const uncheckItemCount = pluralize(uncheckItemIds, ('* ' + list.singular.toLowerCase()), ('* ' + list.plural.toLowerCase()));
+		this.setState({
+			confirmationDialog: {
+				isOpen: true,
+				label: '更新状态',
+				body: (
+					<div>
+						确定要把 {itemCount} 条记录标记为 {status}, {uncheckItemCount} 条记录标记为 {uncheckStatus} 吗?
+						<br />
+						<br />
+						这个不可恢复.
+					</div>
+				),
+				onConfirmation: () => {
+					this.props.dispatch(updateItemsStatus(itemIds, status, uncheckItemIds, uncheckStatus));
+					this.toggleManageMode();
+					this.removeConfirmationDialog();
+				},
+			},
+		});
+	},
 	handleManagementSelect (selection) {
 		if (selection === 'all') this.checkAllItems();
 		if (selection === 'none') this.uncheckAllTableItems();
@@ -196,11 +225,12 @@ const ListView = React.createClass({
 	renderManagement () {
 		const { checkedItems, manageMode, selectAllItemsLoading } = this.state;
 		const { currentList } = this.props;
-
 		return (
 			<ListManagement
+				currentList={currentList}
 				checkedItemCount={Object.keys(checkedItems).length}
 				handleDelete={this.massDelete}
+				updateStatus={this.updateStatus}
 				handleSelect={this.handleManagementSelect}
 				handleToggle={() => this.toggleManageMode(!manageMode)}
 				isOpen={manageMode}

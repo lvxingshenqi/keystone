@@ -15,6 +15,7 @@ class RelatedItemsListRow extends Component {
 	render () {
 		const { columns, item, connectDragSource, connectDropTarget, refList } = this.props;
 		const cells = columns.map((col, i) => {
+			if (col && col.path === 'images' && refList && refList.path === 'scraper-media') return;
 			const ColumnType = Columns[col.type] || Columns.__unrecognised__;
 			const linkTo = !i ? `${Keystone.adminPath}/${refList.path}/${item.id}` : undefined;
 			return <ColumnType key={col.path} list={refList} col={col} data={item} linkTo={linkTo} />;

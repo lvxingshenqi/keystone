@@ -1,11 +1,13 @@
 import React, { PropTypes } from 'react';
 import { Button } from '../../../admin/client/App/elemental';
 import ImageThumbnail from '../../components/ImageThumbnail';
+import LazyLoad from 'react-lazyload';
 
 function OssImagesThumbnail ({
 	isDeleted,
 	imageSourceLarge,
 	imageSourceSmall,
+	thumbSize,
 	inputName,
 	isQueued,
 	openLightbox,
@@ -46,7 +48,9 @@ function OssImagesThumbnail ({
 				mask={mask}
 				target={!!imageSourceLarge && '__blank'}
 			>
-				<img src={imageSourceSmall} style={{ width: 350 }} />
+				<LazyLoad height={thumbSize}>
+					<img src={imageSourceSmall} style={{ width: thumbSize || 90 }} />
+				</LazyLoad>
 			</ImageThumbnail>
 			{actionButton}
 			{input}
@@ -58,6 +62,7 @@ function OssImagesThumbnail ({
 OssImagesThumbnail.propTypes = {
 	imageSourceLarge: PropTypes.string,
 	imageSourceSmall: PropTypes.string.isRequired,
+	thumbSize: PropTypes.number,
 	isDeleted: PropTypes.bool,
 	isQueued: PropTypes.bool,
 	openLightbox: PropTypes.func.isRequired,

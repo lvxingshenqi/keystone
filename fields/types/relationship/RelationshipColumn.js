@@ -19,22 +19,37 @@ var RelationshipColumn = React.createClass({
 		if (!value || !value.length) return;
 		const refList = this.props.col.field.refList;
 		const items = [];
-		for (let i = 0; i < 3; i++) {
-			if (!value[i]) break;
-			if (i) {
-				items.push(<span key={'comma' + i}>, </span>);
+		const isScraperMedia = this.props.list.id === 'scraper-media' && this.props.col.path === 'tag_list';
+		if (isScraperMedia) {
+			for (let i = 0; i < value.length; i++) {
+				if (!value[i]) break;
+				if (i) {
+					items.push(<span key={'comma' + i}>, </span>);
+				}
+				items.push(
+					<ItemsTableValue interior truncate={false} key={'anchor' + i} to={Keystone.adminPath + '/' + refList.path + '/' + value[i].id}>
+						{value[i].name}
+					</ItemsTableValue>
+				);
 			}
-			items.push(
-				<ItemsTableValue interior truncate={false} key={'anchor' + i} to={Keystone.adminPath + '/' + refList.path + '/' + value[i].id}>
-					{value[i].name}
-				</ItemsTableValue>
-			);
-		}
-		if (value.length > 3) {
-			items.push(<span key="more" style={moreIndicatorStyle}>[...{value.length - 3} more]</span>);
+		} else {
+			for (let i = 0; i < 3; i++) {
+				if (!value[i]) break;
+				if (i) {
+					items.push(<span key={'comma' + i}>, </span>);
+				}
+				items.push(
+					<ItemsTableValue interior truncate={false} key={'anchor' + i} to={Keystone.adminPath + '/' + refList.path + '/' + value[i].id}>
+						{value[i].name}
+					</ItemsTableValue>
+				);
+			}
+			if (value.length > 3) {
+				items.push(<span key="more" style={moreIndicatorStyle}>[...{value.length - 3} more]</span>);
+			}
 		}
 		return (
-			<ItemsTableValue field={this.props.col.type}>
+			<ItemsTableValue field={this.props.col.type} truncate={!isScraperMedia}>
 				{items}
 			</ItemsTableValue>
 		);

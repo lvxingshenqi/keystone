@@ -589,10 +589,10 @@ var EditForm = React.createClass({
 		// console.log('this.props.list.uiElements', this.props.list.uiElements);
 
 		const hotkeyMap = {
-			pubAndSaveHotkeys: 'up',
-			getNextHotkeys: 'down',
-			handledAndNextHotkeys: 'left',
-	      	pubAndNextHotkeys: 'right',
+			pubAndSaveHotkeys: 'alt+up',
+			getNextHotkeys: 'alt+down',
+			handledAndNextHotkeys: 'alt+left',
+	      	pubAndNextHotkeys: 'alt+right',
 	    };
 		const hotkeyHandlers = {
             pubAndSaveHotkeys: this.pubAndSave.bind(this),

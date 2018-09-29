@@ -8,8 +8,10 @@ import {
 } from '../../../elemental';
 
 function ListManagement ({
+	currentList,
 	checkedItemCount,
 	handleDelete,
+	updateStatus,
 	handleSelect,
 	handleToggle,
 	isOpen,
@@ -37,6 +39,36 @@ function ListManagement ({
 				position="left"
 				variant="link">
 				Delete
+			</GlyphButton>
+		</Section>
+	);
+
+	// publish button
+	const publishButtons = currentList && (currentList.id === 'scraper-media' || currentList.id === 'scraper-accounts') && isOpen && (
+		<Section>
+			<GlyphButton
+				color="success"
+				disabled={!checkedItemCount}
+				glyph="thumbsup"
+				onClick={() => updateStatus('publish', 'handled')}
+				position="left"
+				variant="link">
+				发布
+			</GlyphButton>
+		</Section>
+	);
+
+	// handle button
+	const handleButtons = currentList && (currentList.id === 'scraper-media' || currentList.id === 'scraper-accounts') && isOpen && (
+		<Section>
+			<GlyphButton
+				color="info"
+				disabled={!checkedItemCount}
+				glyph="thumbsdown"
+				onClick={() => updateStatus('handled', 'publish')}
+				position="left"
+				variant="link">
+				处理
 			</GlyphButton>
 		</Section>
 	);
@@ -92,6 +124,8 @@ function ListManagement ({
 					</Button>
 				</Section>
 				{selectButtons}
+				{publishButtons}
+				{handleButtons}
 				{actionButtons}
 				{selectedCountText}
 			</Group>
@@ -100,8 +134,10 @@ function ListManagement ({
 };
 
 ListManagement.propTypes = {
+	currentList: PropTypes.object,
 	checkedItems: PropTypes.number,
 	handleDelete: PropTypes.func.isRequired,
+	updateStatus: PropTypes.func.isRequired,
 	handleSelect: PropTypes.func.isRequired,
 	handleToggle: PropTypes.func.isRequired,
 	isOpen: PropTypes.bool,

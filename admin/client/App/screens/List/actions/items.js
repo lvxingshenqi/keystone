@@ -117,3 +117,13 @@ export function deleteItems (ids) {
 		});
 	};
 }
+
+export function updateItemsStatus (itemIds, status, uncheckItemIds, uncheckStatus) {
+	return (dispatch, getState) => {
+		const list = getState().lists.currentList;
+		list.updateItemsStatus(itemIds, status, uncheckItemIds, uncheckStatus, (err, data) => {
+			// TODO ERROR HANDLING
+			dispatch(loadItems());
+		});
+	};
+}

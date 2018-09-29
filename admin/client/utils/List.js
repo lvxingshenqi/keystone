@@ -343,6 +343,35 @@ List.prototype.deleteItems = function (itemIds, callback) {
 	});
 };
 
+/**
+ * Handle multiple items at once via the API
+ *
+ * @param  {Array}   itemIds  An array of ids of items we want to delete
+ * @param  {Function} callback
+ */
+List.prototype.updateItemsStatus = function (itemIds, status, uncheckIds, uncheckStatus, callback) {
+	const url = Keystone.adminPath + '/api/' + this.path + '/updatestatus';
+	xhr({
+		url: url,
+		method: 'POST',
+		headers: assign({}, Keystone.csrf.header),
+		json: {
+			ids: itemIds,
+			status: status,
+			uncheckIds: uncheckIds,
+			uncheckStatus: uncheckStatus,
+		},
+	}, (err, resp, body) => {
+		if (err) return callback(err);
+		// Pass the body as result or error, depending on the statusCode
+		if (resp.statusCode === 200) {
+			callback(null, body);
+		} else {
+			callback(body);
+		}
+	});
+};
+
 List.prototype.reorderItems = function (item, oldSortOrder, newSortOrder, pageOptions, callback) {
 	const url = Keystone.adminPath + '/api/' + this.path + '/' + item.id + '/sortOrder/' + oldSortOrder + '/' + newSortOrder + '/' + buildQueryString(pageOptions);
 	xhr({
