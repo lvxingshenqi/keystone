@@ -53,6 +53,7 @@ ossvideos.prototype.addToSchema=function(schema){
 	var VideoSchema=new mongoose.Schema({
         domain:String,
 		url:String,
+        original:String,
 		filename:String,
 		duration:Number,
 		size:Number,

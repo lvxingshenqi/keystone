@@ -45,7 +45,7 @@ module.exports = Field.create({
 			return this.getThumbnail({
 				value: img,
 				imageSourceSmall: url,
-				imageSourceLarge: url,
+				imageSourceLarge: img.url,
 			}, index);
 		}) : [];
 		return { thumbnails, uploadFieldPath };
@@ -55,7 +55,6 @@ module.exports = Field.create({
 			<Thumbnail
 				key={`thumbnail-${index}`}
 				inputName={this.getInputName(this.props.path)}
-				openLightbox={(e) => this.openLightbox(e, index)}
 				shouldRenderActionButton={this.shouldRenderField()}
 				toggleDelete={this.removeImage.bind(this, index)}
 				{...props}

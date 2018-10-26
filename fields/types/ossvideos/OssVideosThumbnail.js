@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import { Button } from '../../../admin/client/App/elemental';
+import { Button, FormField, FormInput, FormNote } from '../../../admin/client/App/elemental';
 import ImageThumbnail from '../../components/ImageThumbnail';
 
 function CloudinaryVideosThumbnail ({
@@ -37,6 +37,14 @@ function CloudinaryVideosThumbnail ({
 		marginRight: 10,
 	};
 
+	const openValue = function() {
+		if (!imageSourceLarge) return;
+		if (!/^(mailto\:)|(\w+\:\/\/)/.test(imageSourceLarge)) {
+			imageSourceLarge = 'http://' + imageSourceLarge;
+		}
+		window.open(imageSourceLarge);
+	}
+
 	return (
 		<div style={imageStyles}>
 			<ImageThumbnail
@@ -47,6 +55,11 @@ function CloudinaryVideosThumbnail ({
 				target={!!imageSourceLarge && '__blank'}
 			>
 				<img src={imageSourceSmall} style={{ height: 90 }} />
+				{/* <div style={{ position: 'relative' }}>
+					<FormInput noedit onClick={imageSourceLarge && openValue}>
+						{imageSourceLarge}
+					</FormInput>
+				</div> */}
 			</ImageThumbnail>
 			{actionButton}
 			{input}

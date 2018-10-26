@@ -65,14 +65,18 @@ module.exports = Field.create({
 		const { value } = this.props;
 		console.log('ImageUrl renderValue', this.props, this.openValue);
 		return (
-			<FormInput noedit onClick={value && this.openValue}>
-				{value}
-			</FormInput>
+			<div style={{ position: 'relative' }}>
+				<FormInput noedit onClick={value && this.openValue}>
+					{value}
+				</FormInput>
+				{this.renderImagePreview()}
+			</div>
 		);
 	},
 	renderImagePreview () {
 		const { value } = this.props;
 		console.log('ImageUrl renderImagePreview', this.props);
+		if (!value) return null;
 		return (
 			<ImageThumbnail
 				component="a"
