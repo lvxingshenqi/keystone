@@ -87,7 +87,9 @@ var Keystone = function () {
 	// init mongoose
 	this.set('mongoose', require('mongoose'));
 	this.mongoose.Promise = require('es6-promise').Promise;
-
+	if (process.env.KEYSTONE_DEV === 'true') {
+		this.mongoose.set('debug', true);	
+	}
 	// Attach middleware packages, bound to this instance
 	this.middleware = {
 		api: require('./lib/middleware/api')(this),
