@@ -215,7 +215,7 @@ var EditForm = React.createClass({
 	//进入下一条草稿
 	getNext (noMoreItemForThatAccount = false) {
 		const {data, list, router } = this.props;
-		if(list.id === "messages" || list.id === "scraper-media"){
+		if(list.id === "messages" || list.id === "scraper-media" || list.id === "scraper-accounts"){
 			this.setState({
 				loadingNext:true,
 			});

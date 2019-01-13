@@ -34,6 +34,8 @@ function ossimages (list, path, options) {
 	this._fixedSize = 'full';
 	this._properties = ['select', 'selectPrefix', 'autoCleanup', 'publicID', 'folder', 'filenameAsPublicID'];
 
+	this.showBigThumb = options.showBigThumb;
+
 	ossimages.super_.call(this, list, path, options);
 
 	// validate cloudinary config

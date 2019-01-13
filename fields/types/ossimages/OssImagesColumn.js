@@ -94,7 +94,7 @@ var OssImagesColumn = React.createClass({
 	render () {
 		const value = this.props.data.fields[this.props.col.path];
 		const many = value.length > 1;
-		const bigthumb = this.props.list.id === 'scraper-media' || this.props.list.id === 'scraper-accounts';
+		const bigthumb = this.props.list.id === 'scraper-media' || this.props.list.id === 'posts' || this.props.list.id === 'scraper-accounts';
 		const thumbSize = this.props.list.id === 'scraper-accounts' ? 150 : 250;
 		return (
 			<ItemsTableCell>

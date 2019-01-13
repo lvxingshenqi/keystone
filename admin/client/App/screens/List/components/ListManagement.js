@@ -44,7 +44,7 @@ function ListManagement ({
 	);
 
 	// publish button
-	const publishButtons = currentList && (currentList.id === 'scraper-media' || currentList.id === 'scraper-accounts') && isOpen && (
+	const publishButtons = currentList && (currentList.id === 'scraper-media' || currentList.id === 'posts' || currentList.id === 'scraper-accounts') && isOpen && (
 		<Section>
 			<GlyphButton
 				color="success"
@@ -59,7 +59,7 @@ function ListManagement ({
 	);
 
 	// handle button
-	const handleButtons = currentList && (currentList.id === 'scraper-media' || currentList.id === 'scraper-accounts') && isOpen && (
+	const handleButtons = currentList && (currentList.id === 'scraper-media' || currentList.id === 'posts' || currentList.id === 'scraper-accounts') && isOpen && (
 		<Section>
 			<GlyphButton
 				color="info"

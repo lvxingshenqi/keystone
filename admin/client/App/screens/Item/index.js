@@ -159,7 +159,7 @@ var ItemView = React.createClass({
 			MozTransition: 'max-width 160ms ease-out',
 			WebkitTransition: 'max-width 160ms ease-out',
 		};
-		if (this.props.routeParams && (this.props.routeParams.listId === "messages" || this.props.routeParams.listId === "scraper-media")) {
+		if (this.props.routeParams && (this.props.routeParams.listId === "messages" || this.props.routeParams.listId === "scraper-media" || this.props.routeParams.listId === "posts")) {
 			containerStyle.maxWidth = '100%';
 		}
 
