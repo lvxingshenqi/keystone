@@ -38,6 +38,10 @@ function OssImagesThumbnail ({
 		marginBottom: 10,
 		marginRight: 10,
 	};
+	const imgStyles = {
+		width: '100%',
+		'max-width': thumbSize || 250 || 90,
+	};
 
 	return (
 		<div style={imageStyles}>
@@ -49,7 +53,7 @@ function OssImagesThumbnail ({
 				target={!!imageSourceLarge && '__blank'}
 			>
 				<LazyLoad height={thumbSize}>
-					<img src={imageSourceSmall} style={{ width: thumbSize || 90 }} />
+					<img src={imageSourceSmall} style={imgStyles} />
 				</LazyLoad>
 			</ImageThumbnail>
 			{actionButton}
