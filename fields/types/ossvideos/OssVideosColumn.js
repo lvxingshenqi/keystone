@@ -28,7 +28,7 @@ var OssVideosColumn = React.createClass({
 	},
 	renderValue (value) {
 		if (!value || !Object.keys(value).length) return;
-
+		value.url += '?x-oss-process=video/snapshot,t_3000,f_jpg,m_fast';
 		return <CloudinaryImageSummary image={value} />;
 
 	},
